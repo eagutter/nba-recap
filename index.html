@@ -24,10 +24,20 @@
     #games {
       --gap: 7px;
       --card-width: 76px;
-      display: flex; flex-wrap: wrap; align-items: center;
-      justify-content: center; gap: var(--gap);
-      width: max-content; max-width: 100%; padding: 2px;
-      overflow: visible !important; background: transparent !important;
+      display: flex; flex-wrap: nowrap; align-items: center;
+      justify-content: flex-start; gap: var(--gap);
+      width: max-content; max-width: 100%; min-width: 0;
+      margin-inline: auto; padding: 4px 2px 10px;
+      overflow-x: auto; overflow-y: hidden;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,255,255,.42) transparent;
+      background: transparent !important;
+    }
+    #games::-webkit-scrollbar { height: 6px; }
+    #games::-webkit-scrollbar-track { background: transparent; }
+    #games::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,.42);
+      border-radius: 100px;
     }
     #games:empty { display: none; }
     .game {
@@ -265,7 +275,8 @@
       if (!count) return;
       const width = gamesElement.parentElement.clientWidth - 20;
       const gap = 7;
-      // One row at desktop widths; wrap instead of ever creating a scrollbar.
+      // Use one row. Cards shrink down to 46px; after that the
+      // games container scrolls horizontally instead of wrapping.
       const ideal = (width - (count-1)*gap - 4)/count;
       const cardWidth = Math.min(76, Math.max(46, ideal));
       gamesElement.style.setProperty("--card-width", cardWidth.toFixed(1) + "px");
