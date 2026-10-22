@@ -3,67 +3,93 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="dark light">
-  <title>NBA · Previous Game Day</title>
+  <title>NBA · Last completed game day</title>
   <style>
     :root { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-    * { box-sizing: border-box; }
-    html, body { width: 100%; height: 100%; margin: 0; background: transparent; }
-    body { display: grid; place-items: center; color: #fff; overflow: hidden; }
-    #widget { width: 100%; min-width: 0; display: grid; justify-items: center; gap: 9px; padding: 6px 0 7px; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+      width: 100%; height: 100%; margin: 0; padding: 0;
+      background: transparent !important;
+    }
+    body {
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; overflow: hidden;
+    }
+    #widget {
+      width: 100%; max-width: 100%; min-width: 0;
+      padding: 5px 7px; display: flex; align-items: center;
+      justify-content: center; flex-direction: column; gap: 8px;
+      background: transparent !important;
+    }
     #games {
-      display: flex; align-items: stretch; gap: 7px;
-      width: max-content; max-width: 100%;
-      overflow-x: auto; overflow-y: hidden;
-      scrollbar-width: thin; scrollbar-color: #ffffff55 transparent;
-      padding: 2px 6px 4px;
-      -webkit-overflow-scrolling: touch;
+      --gap: 7px;
+      --card-width: 76px;
+      display: flex; flex-wrap: wrap; align-items: center;
+      justify-content: center; gap: var(--gap);
+      width: max-content; max-width: 100%; padding: 2px;
+      overflow: visible !important; background: transparent !important;
     }
     #games:empty { display: none; }
-    a.game {
-      position: relative; display: flex; flex: 0 0 82px;
-      flex-direction: column; align-items: center; justify-content: center;
-      min-height: 130px; padding: 7px 6px;
-      border: 1px solid rgba(255, 255, 255, .14);
+    .game {
+      position: relative; display: flex; flex: 0 0 var(--card-width);
+      width: var(--card-width); flex-direction: column;
+      align-items: center; justify-content: center;
+      min-height: 128px; padding: 7px 4px;
+      border: 1px solid rgba(255,255,255,.16);
       border-radius: 12px;
-      background: rgba(18, 22, 31, .66);
-      box-shadow: 0 3px 14px rgba(0,0,0,.12);
-      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-      color: inherit; text-decoration: none;
+      background: rgba(18,22,31,.73);
+      box-shadow: 0 4px 12px rgba(0,0,0,.16);
+      -webkit-backdrop-filter: blur(9px); backdrop-filter: blur(9px);
+      color: #fff; text-decoration: none;
       transition: background .15s ease, border-color .15s ease, transform .15s ease;
     }
+    a.game { cursor: pointer; }
     a.game:hover, a.game:focus-visible {
-      background: rgba(36, 43, 57, .86);
-      border-color: rgba(255, 255, 255, .52);
-      transform: translateY(-2px);
-      outline: none;
+      background: rgba(40,47,63,.91);
+      border-color: rgba(255,255,255,.62);
+      transform: translateY(-2px); outline: none;
     }
-    a.game:focus-visible { outline: 2px solid #a6d4ff; outline-offset: 2px; }
-    .team { display: flex; flex-direction: column; align-items: center; gap: 0; width: 100%; }
+    a.game:focus-visible { outline: 2px solid #bfe2ff; outline-offset: 2px; }
+    .game.pending { cursor: default; }
+    .game.pending:hover { border-color: rgba(255,255,255,.16); }
+    .team {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 0; width: 100%;
+    }
     .team.home { flex-direction: column-reverse; }
-    .logo { width: 31px; height: 31px; object-fit: contain; display: block; }
-    .initials {
-      width: 31px; height: 31px; display: grid; place-items: center;
-      font-size: 10px; font-weight: 750; letter-spacing: -.04em;
-      border-radius: 50%; background: #455169;
+    .logo {
+      display: block; width: min(31px, calc(var(--card-width) * .48));
+      height: min(31px, calc(var(--card-width) * .48)); object-fit: contain;
     }
-    .score { font-size: 21px; font-weight: 540; line-height: 25px; letter-spacing: -.045em; font-variant-numeric: tabular-nums; }
-    .score.loser { color: #b9c0ce; font-weight: 440; }
+    .initials {
+      width: min(31px, calc(var(--card-width) * .48));
+      height: min(31px, calc(var(--card-width) * .48));
+      display: grid; place-items: center; border-radius: 50%;
+      background: #485266; font-size: 10px; font-weight: 750;
+    }
+    .score {
+      font-size: clamp(15px, calc(var(--card-width) * .27), 21px);
+      line-height: 25px; letter-spacing: -.045em;
+      font-variant-numeric: tabular-nums; font-weight: 530;
+    }
+    .score.loser { color: #b7c0cf; font-weight: 440; }
     .score.winner { color: #fff; font-weight: 760; }
-    .score-separator { height: 1px; width: 28px; background: #ffffff22; margin: 2px 0; }
+    .score-separator { height: 1px; width: min(28px, 70%); background: #ffffff2a; margin: 2px 0; }
     #status {
-      max-width: 96vw; text-align: center; font-size: 10px; font-weight: 650;
-      line-height: 14px; letter-spacing: .15em; text-transform: uppercase;
-      color: rgba(255,255,255,.85); text-shadow: 0 1px 8px rgba(0,0,0,.7);
+      max-width: 98%; min-height: 14px; text-align: center;
+      font-size: 10px; font-weight: 650; line-height: 14px;
+      letter-spacing: .13em; text-transform: uppercase;
+      color: rgba(255,255,255,.90);
+      text-shadow: 0 1px 7px rgba(0,0,0,.95);
     }
     #status:empty { display: none; }
     #message {
-      display: none; padding: 10px 14px; max-width: min(90vw, 500px);
+      display: none; max-width: 90%; padding: 10px 14px;
       font-size: 13px; text-align: center;
-      background: rgba(18, 22, 31, .75); border-radius: 12px;
+      background: rgba(18,22,31,.72); border-radius: 12px;
     }
     #message a { color: #bde5ff; }
-    @media (prefers-reduced-motion: reduce) { a.game { transition: none; } }
+    @media (prefers-reduced-motion: reduce) { .game { transition: none; } }
   </style>
 </head>
 <body>
@@ -72,11 +98,8 @@
     <div id="status" role="status">Loading NBA scores…</div>
     <div id="message" role="alert"></div>
   </main>
-
   <script>
     "use strict";
-
-    // You can safely change these values later if you want different behaviour.
     const DAYS_TO_CHECK = 14;
     const CACHE_MINUTES = 15;
     const ESPN_URL = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard";
@@ -84,107 +107,139 @@
     const statusElement = document.getElementById("status");
     const messageElement = document.getElementById("message");
 
-    // NBA game days are grouped by US Eastern calendar date, not UK local date.
+    // The scheduled GitHub Action reads the public YouTube RSS feed and
+    // saves verified Motion Station video IDs into videos.json.
+    const motionStationChannel = "https://www.youtube.com/@motionstation4342/videos";
+    let lastRenderedEvents = [];
+
     function easternTodayUTC() {
-      const dateParts = new Intl.DateTimeFormat("en-GB", {
+      const parts = new Intl.DateTimeFormat("en-GB", {
         timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit"
       }).formatToParts(new Date());
-      const part = (name) => Number(dateParts.find((p) => p.type === name).value);
+      const part = name => Number(parts.find(p => p.type === name).value);
       return new Date(Date.UTC(part("year"), part("month") - 1, part("day")));
     }
-
-    function dateKey(date) {
-      return date.toISOString().slice(0, 10).replace(/-/g, "");
-    }
-
+    const dateKey = date => date.toISOString().slice(0,10).replace(/-/g, "");
     function readableDate(date) {
       return new Intl.DateTimeFormat("en-GB", {
         timeZone: "UTC", weekday: "short", day: "numeric", month: "short"
       }).format(date);
     }
-
-    function youtubeLink(away, home, date) {
-      const longDate = new Intl.DateTimeFormat("en-US", {
-        timeZone: "UTC", month: "long", day: "numeric", year: "numeric"
-      }).format(date);
-      const query = `NBA ${away.team.displayName} vs ${home.team.displayName} full game highlights ${longDate}`;
-      return "https://www.youtube.com/results?search_query=" + encodeURIComponent(query);
-    }
-
-    function completeGame(event) {
-      return event?.status?.type?.completed === true ||
-             event?.competitions?.[0]?.status?.type?.completed === true;
-    }
+    const completeGame = event =>
+      event?.status?.type?.completed === true ||
+      event?.competitions?.[0]?.status?.type?.completed === true;
 
     async function fetchOneDay(date) {
       const response = await fetch(`${ESPN_URL}?dates=${dateKey(date)}&limit=50`);
       if (!response.ok) throw new Error(`ESPN returned HTTP ${response.status}`);
-      const result = await response.json();
-      if (!Array.isArray(result.events)) throw new Error("Unexpected ESPN response");
-      return result.events;
+      const body = await response.json();
+      if (!Array.isArray(body.events)) throw new Error("Unexpected ESPN data format");
+      return body.events;
     }
 
     async function findLastFinishedDay() {
       const todayET = easternTodayUTC();
-      const cacheKey = "nba-recap-v1";
       try {
-        const stored = JSON.parse(localStorage.getItem(cacheKey));
-        if (stored?.todayKey === dateKey(todayET) &&
-            (Date.now() - stored.savedAt) < CACHE_MINUTES * 60000 &&
-            Array.isArray(stored.games)) {
-          return { date: stored.date ? new Date(stored.date + "T00:00:00Z") : null,
-                   events: stored.games };
+        const cached = JSON.parse(localStorage.getItem("nba-recap-v2"));
+        if (cached?.todayKey === dateKey(todayET) &&
+            Date.now() - cached.savedAt < CACHE_MINUTES * 60000 &&
+            Array.isArray(cached.events)) {
+          return { date: cached.date ? new Date(cached.date + "T00:00:00Z") : null,
+                   events: cached.events };
         }
-      } catch (_) { /* Storage can be blocked in an extension iframe. That's fine. */ }
+      } catch (_) { /* Private/extension contexts can block storage. */ }
 
-      for (let offset = 1; offset <= DAYS_TO_CHECK; offset++) {
-        const date = new Date(todayET.getTime() - offset * 86400000);
+      for (let offset=1; offset<=DAYS_TO_CHECK; offset++) {
+        const date = new Date(todayET.getTime() - offset*86400000);
         const events = await fetchOneDay(date);
-        if (!events.length) continue;
-        // Do not show partial slates, live games, or upcoming games.
-        if (!events.every(completeGame)) continue;
-        const value = { date, events };
+        if (!events.length || !events.every(completeGame)) continue;
         try {
-          localStorage.setItem(cacheKey, JSON.stringify({
-            todayKey: dateKey(todayET), savedAt: Date.now(),
-            date: date.toISOString().slice(0, 10), games: events
+          localStorage.setItem("nba-recap-v2", JSON.stringify({
+            todayKey: dateKey(todayET), date: date.toISOString().slice(0,10),
+            savedAt: Date.now(), events
           }));
-        } catch (_) { /* Widget works without local storage. */ }
-        return value;
+        } catch (_) { /* Optional cache. */ }
+        return { date, events };
       }
-      try {
-        localStorage.setItem(cacheKey, JSON.stringify({
-          todayKey: dateKey(todayET), savedAt: Date.now(), date: null, games: []
-        }));
-      } catch (_) { /* Ignore storage errors. */ }
       return { date: null, events: [] };
     }
 
-    function scoreText(value) {
-      return String(typeof value === "object"
-        ? (value?.displayValue ?? value?.value ?? "—")
-        : (value ?? "—"));
+    async function fetchMotionStationVideos() {
+      try {
+        const cacheBuster = Math.floor(Date.now() / (15*60*1000));
+        const response = await fetch(`./videos.json?v=${cacheBuster}`, { cache: "no-store" });
+        if (!response.ok) return [];
+        const data = await response.json();
+        return Array.isArray(data.videos) ? data.videos.filter(v =>
+          typeof v.title === "string" && /^[a-zA-Z0-9_-]{11}$/.test(v.id) &&
+          typeof v.published === "string") : [];
+      } catch (error) {
+        console.warn("Motion Station feed not available yet:", error);
+        return [];
+      }
     }
 
-    function teamStack(competitor, order, won) {
+    const normalize = text => String(text || "").toLowerCase()
+      .normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, " ").trim();
+    const scoreText = value => String(typeof value === "object"
+      ? (value?.displayValue ?? value?.value ?? "—") : (value ?? "—"));
+
+    // Use the team nickname (e.g. "Celtics") so uploads with abbreviated
+    // titles still match. Reject titles with conflicting explicit scores.
+    function teamAliases(team) {
+      const name = normalize(team?.displayName);
+      const nickname = normalize(team?.name);
+      const aliases = [name, nickname];
+      if (name.endsWith("trail blazers")) aliases.push("blazers");
+      if (name.endsWith("76ers")) aliases.push("sixers");
+      if (name.endsWith("clippers")) aliases.push("la clippers");
+      return [...new Set(aliases.filter(x => x.length >= 4))];
+    }
+    function mentionsTeam(title, team) {
+      return teamAliases(team).some(name => (" " + title + " ").includes(" " + name + " "));
+    }
+    function findHighlight(away, home, gameDate, videos) {
+      const dayStart = gameDate.getTime();
+      const awayScore = Number(scoreText(away.score));
+      const homeScore = Number(scoreText(home.score));
+      const validScores = Number.isFinite(awayScore) && Number.isFinite(homeScore);
+      let best = null;
+      for (const video of videos) {
+        const title = normalize(video.title);
+        if (!mentionsTeam(title, away.team) || !mentionsTeam(title, home.team)) continue;
+        const publishedAt = Date.parse(video.published);
+        if (!Number.isFinite(publishedAt)) continue;
+        const hoursAfterDayStart = (publishedAt - dayStart) / 3600000;
+        if (hoursAfterDayStart < -12 || hoursAfterDayStart > 85) continue;
+        const numbers = [...title.matchAll(/\b\d{2,3}\b/g)]
+          .map(m => Number(m[0])).filter(n => n >= 65 && n <= 200);
+        const hasBothScores = validScores && numbers.includes(awayScore) && numbers.includes(homeScore);
+        if (numbers.length >= 2 && !hasBothScores) continue;
+        const likelyRecap = /\b(recap|highlight|highlights)\b/.test(title);
+        // Strongly prefer exact scores; use upload proximity only as a tie-breaker.
+        const quality = (hasBothScores ? 100 : 0) + (likelyRecap ? 10 : 0) -
+          Math.abs(hoursAfterDayStart - 31)/100;
+        if (!best || quality > best.quality) best = { quality, id: video.id };
+      }
+      return best ? `https://www.youtube.com/watch?v=${best.id}` : null;
+    }
+
+    function teamStack(competitor, order, winner) {
       const element = document.createElement("div");
       element.className = "team " + order;
-
       const logoUrl = competitor.team?.logo || competitor.team?.logos?.[0]?.href || "";
       let logo;
       if (typeof logoUrl === "string" && logoUrl.startsWith("https://")) {
         logo = document.createElement("img");
-        logo.className = "logo";
-        logo.src = logoUrl;
-        logo.alt = competitor.team?.displayName || "Team logo";
-        logo.width = 31; logo.height = 31;
-        logo.loading = "eager";
-        logo.referrerPolicy = "no-referrer";
+        logo.className = "logo"; logo.src = logoUrl;
+        logo.alt = competitor.team?.displayName || "NBA team";
+        logo.loading = "eager"; logo.referrerPolicy = "no-referrer";
         logo.addEventListener("error", () => {
-          const substitute = document.createElement("span");
-          substitute.className = "initials";
-          substitute.textContent = competitor.team?.abbreviation || "NBA";
-          logo.replaceWith(substitute);
+          const fallback = document.createElement("span");
+          fallback.className = "initials";
+          fallback.textContent = competitor.team?.abbreviation || "NBA";
+          logo.replaceWith(fallback);
         }, { once: true });
       } else {
         logo = document.createElement("span");
@@ -192,52 +247,65 @@
         logo.textContent = competitor.team?.abbreviation || "NBA";
       }
       const score = document.createElement("span");
-      score.className = "score " + (won ? "winner" : "loser");
+      score.className = "score " + (winner ? "winner" : "loser");
       score.textContent = scoreText(competitor.score);
       element.append(logo, score);
       return element;
     }
 
-    function displayDay(result) {
-      const { date, events } = result;
+    function fitCards() {
+      const count = gamesElement.children.length;
+      if (!count) return;
+      const width = gamesElement.parentElement.clientWidth - 20;
+      const gap = 7;
+      // One row at desktop widths; wrap instead of ever creating a scrollbar.
+      const ideal = (width - (count-1)*gap - 4)/count;
+      const cardWidth = Math.min(76, Math.max(46, ideal));
+      gamesElement.style.setProperty("--card-width", cardWidth.toFixed(1) + "px");
+    }
+
+    function displayDay({ date, events }, videos) {
       gamesElement.replaceChildren();
       messageElement.style.display = "none";
       messageElement.textContent = "";
-
-      if (!events.length || !date) {
-        statusElement.textContent = "No finished NBA game days in the last 14 days";
+      if (!date || !events.length) {
+        statusElement.textContent = "No completed NBA game day in the last 14 days";
         return;
       }
-
-      let shown = 0;
+      let linked = 0;
       for (const event of events) {
         const competitors = event?.competitions?.[0]?.competitors || [];
-        const away = competitors.find((c) => c.homeAway === "away");
-        const home = competitors.find((c) => c.homeAway === "home");
+        const away = competitors.find(c => c.homeAway === "away");
+        const home = competitors.find(c => c.homeAway === "home");
         if (!away || !home) continue;
-
-        const card = document.createElement("a");
-        card.className = "game";
-        card.href = youtubeLink(away, home, date);
-        card.target = "_blank";
-        card.rel = "noopener noreferrer";
-        card.title = `${away.team.displayName} ${scoreText(away.score)} – ${home.team.displayName} ${scoreText(home.score)}. Open YouTube highlights search.`;
+        const highlight = findHighlight(away, home, date, videos);
+        const card = document.createElement(highlight ? "a" : "div");
+        card.className = "game" + (highlight ? "" : " pending");
+        const description = `${away.team.displayName} ${scoreText(away.score)} – ${home.team.displayName} ${scoreText(home.score)}`;
+        if (highlight) {
+          card.href = highlight;
+          card.target = "_blank";
+          card.rel = "noopener noreferrer";
+          card.title = description + ". Watch Motion Station highlights on YouTube.";
+          linked++;
+        } else {
+          card.title = description + ". Motion Station highlights not available yet.";
+        }
         card.setAttribute("aria-label", card.title);
-
-        const awayScore = Number(scoreText(away.score));
-        const homeScore = Number(scoreText(home.score));
-        const awayWon = awayScore > homeScore;
-        const homeWon = homeScore > awayScore;
+        const awayWon = Number(scoreText(away.score)) > Number(scoreText(home.score));
+        const homeWon = Number(scoreText(home.score)) > Number(scoreText(away.score));
         const divider = document.createElement("div");
         divider.className = "score-separator";
         divider.setAttribute("aria-hidden", "true");
-        card.append(teamStack(away, "away", awayWon), divider, teamStack(home, "home", homeWon));
+        card.append(teamStack(away, "away", awayWon), divider,
+                    teamStack(home, "home", homeWon));
         gamesElement.appendChild(card);
-        shown++;
       }
-      statusElement.textContent = shown
-        ? `NBA · ${readableDate(date)} · Final · Click for highlights`
-        : "No scores available for the selected NBA game day";
+      fitCards();
+      const n = gamesElement.children.length;
+      statusElement.textContent = n
+        ? `NBA · ${readableDate(date)} · Final · ${linked ? linked + " highlight" + (linked === 1 ? "" : "s") + " linked" : "Highlights pending"}`
+        : "No NBA scores found";
     }
 
     function showError(error) {
@@ -245,21 +313,23 @@
       statusElement.textContent = "NBA · Scores unavailable";
       messageElement.textContent = "Could not load scores. ";
       const retry = document.createElement("a");
-      retry.href = "#";
-      retry.textContent = "Try again";
-      retry.addEventListener("click", (event) => { event.preventDefault(); load(); });
+      retry.href = "#"; retry.textContent = "Try again";
+      retry.addEventListener("click", e => { e.preventDefault(); load(); });
       messageElement.append(retry);
       messageElement.style.display = "block";
-      console.error("NBA recap error:", error);
+      console.error("NBA widget error:", error);
     }
 
     async function load() {
-      try { displayDay(await findLastFinishedDay()); }
-      catch (error) { showError(error); }
+      try {
+        const [result, videos] = await Promise.all([
+          findLastFinishedDay(), fetchMotionStationVideos()
+        ]);
+        displayDay(result, videos);
+      } catch (error) { showError(error); }
     }
-
+    window.addEventListener("resize", fitCards);
     load();
-    // Also update tabs that are left open overnight.
     setInterval(load, 15 * 60 * 1000);
   </script>
 </body>
