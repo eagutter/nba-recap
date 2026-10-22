@@ -186,7 +186,8 @@
       ? (value?.displayValue ?? value?.value ?? "—") : (value ?? "—"));
 
     // Use the team nickname (e.g. "Celtics") so uploads with abbreviated
-    // titles still match. Reject titles with conflicting explicit scores.
+    // titles still match. Prefer exact scores, but accept one correct score
+    // when the channel makes a typo (e.g. Raptors 135, Bulls 102 vs 135-92).
     function teamAliases(team) {
       const name = normalize(team?.displayName);
       const nickname = normalize(team?.name);
@@ -214,11 +215,17 @@
         if (hoursAfterDayStart < -12 || hoursAfterDayStart > 85) continue;
         const numbers = [...title.matchAll(/\b\d{2,3}\b/g)]
           .map(m => Number(m[0])).filter(n => n >= 65 && n <= 200);
-        const hasBothScores = validScores && numbers.includes(awayScore) && numbers.includes(homeScore);
-        if (numbers.length >= 2 && !hasBothScores) continue;
+        const scoresMatched = validScores
+          ? Number(numbers.includes(awayScore)) + Number(numbers.includes(homeScore))
+          : 0;
+        // If a title specifies both scores, insist that at least one is right.
+        // The two teams and upload date must also match (checked above).
+        // This tolerates a typo in one score without trusting unrelated recaps.
+        if (numbers.length >= 2 && scoresMatched === 0) continue;
         const likelyRecap = /\b(recap|highlight|highlights)\b/.test(title);
-        // Strongly prefer exact scores; use upload proximity only as a tie-breaker.
-        const quality = (hasBothScores ? 100 : 0) + (likelyRecap ? 10 : 0) -
+        // Prefer two correct scores over one, and scored titles over unscored ones.
+        const scoreQuality = scoresMatched === 2 ? 100 : scoresMatched === 1 ? 60 : 0;
+        const quality = scoreQuality + (likelyRecap ? 10 : 0) -
           Math.abs(hoursAfterDayStart - 31)/100;
         if (!best || quality > best.quality) best = { quality, id: video.id };
       }
