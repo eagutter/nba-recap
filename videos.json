@@ -1,226 +1,256 @@
 {
   "channel": "Motion Station",
-  "updated_at": "2026-10-26T09:37:58+00:00",
+  "updated_at": "2026-10-26T09:38:59+00:00",
   "videos": [
     {
       "id": "gv6S5cm6oik",
       "title": "Game Recap: Pistons 106, 76ers 93",
-      "published": "2026-10-26T07:02:11+00:00"
+      "published": "2026-10-26T07:02:11Z"
     },
     {
       "id": "_L71cyvEVCg",
       "title": "Game Recap: Grizzlies 123, Kings 112",
-      "published": "2026-10-26T06:55:06+00:00"
+      "published": "2026-10-26T06:55:06Z"
     },
     {
       "id": "HpmmmFV5Twk",
       "title": "Game Recap: Thunder 108, Clippers 101",
-      "published": "2026-10-26T06:54:29+00:00"
+      "published": "2026-10-26T06:54:29Z"
     },
     {
       "id": "c7b2JCvTR98",
       "title": "Game Recap: Timberwolves 117, Raptors 94",
-      "published": "2026-10-26T06:54:16+00:00"
+      "published": "2026-10-26T06:54:16Z"
     },
     {
       "id": "fmAdrJBtNZA",
       "title": "Game Recap: Magic 111, Knicks 102",
-      "published": "2026-10-26T06:54:02+00:00"
+      "published": "2026-10-26T06:54:02Z"
     },
     {
       "id": "vHwTuQDyJOo",
       "title": "Game Recap: Pacers 136, Nets 109",
-      "published": "2026-10-26T06:51:46+00:00"
+      "published": "2026-10-26T06:51:46Z"
     },
     {
       "id": "a8VK5sNsLJg",
       "title": "Game Recap: Lakers 132, Jazz 123",
-      "published": "2026-10-26T06:51:31+00:00"
+      "published": "2026-10-26T06:51:31Z"
     },
     {
       "id": "0ywNOiLVfDo",
       "title": "Game Recap: Nuggets 141, Pelicans 135",
-      "published": "2026-10-25T06:04:32+00:00"
+      "published": "2026-10-25T06:04:32Z"
     },
     {
       "id": "gyEkc59XYJM",
       "title": "Game Recap: Suns 131, Warriors 122",
-      "published": "2026-10-25T05:40:49+00:00"
+      "published": "2026-10-25T05:40:49Z"
     },
     {
       "id": "VjqavNrlSjg",
       "title": "Game Recap: Rockets 121, Hawks 114",
-      "published": "2026-10-25T04:43:13+00:00"
+      "published": "2026-10-25T04:43:13Z"
     },
     {
       "id": "A5VePOqLRHM",
       "title": "Game Recap: Wizards 124, Bulls 120",
-      "published": "2026-10-25T04:35:21+00:00"
+      "published": "2026-10-25T04:35:21Z"
     },
     {
       "id": "h0Xg7SKjV04",
       "title": "Game Recap: 76ers 127, Bucks 116",
-      "published": "2026-10-25T03:49:12+00:00"
+      "published": "2026-10-25T03:49:12Z"
     },
     {
       "id": "S3uetdyTgK8",
       "title": "Game Recap: Cavaliers 125, Nets 121",
-      "published": "2026-10-25T03:41:55+00:00"
+      "published": "2026-10-25T03:41:55Z"
     },
     {
       "id": "-c1k0-wppDU",
       "title": "Game Recap: Spurs 122, Mavericks 106",
-      "published": "2026-10-25T03:35:37+00:00"
+      "published": "2026-10-25T03:35:37Z"
     },
     {
       "id": "wDQkFVjppWI",
       "title": "Game Recap: Hornets 115, Heat 110",
-      "published": "2026-10-25T03:26:21+00:00"
+      "published": "2026-10-25T03:26:21Z"
     },
     {
       "id": "Eq2y6Do29qQ",
       "title": "Game Recap: Trail Blazers 128, Kings 120",
-      "published": "2026-10-24T08:59:11+00:00"
+      "published": "2026-10-24T08:59:11Z"
     },
     {
       "id": "JrLg_YY55eM",
       "title": "Game Recap: Grizzlies 111, Warriors 108",
-      "published": "2026-10-24T08:52:45+00:00"
+      "published": "2026-10-24T08:52:45Z"
     },
     {
       "id": "GUgzXkH_LU4",
       "title": "Game Recap: Lakers 125, Clippers 117",
-      "published": "2026-10-24T08:48:55+00:00"
+      "published": "2026-10-24T08:48:55Z"
     },
     {
       "id": "QfJHXk2srcw",
       "title": "Game Recap: Rockets 114, Spurs 110",
-      "published": "2026-10-24T08:43:27+00:00"
+      "published": "2026-10-24T08:43:27Z"
     },
     {
       "id": "4SXzTYgV0Yg",
       "title": "Game Recap: Jazz 120, Pelicans 119",
-      "published": "2026-10-24T05:27:47+00:00"
+      "published": "2026-10-24T05:27:47Z"
     },
     {
       "id": "ycgMjnMHoTI",
       "title": "Game Recap: Pistons 128, Heat 111",
-      "published": "2026-10-24T04:47:48+00:00"
+      "published": "2026-10-24T04:47:48Z"
     },
     {
       "id": "I03duyjJY70",
       "title": "Game Recap: Mavericks 121, Pacers 105",
-      "published": "2026-10-24T04:20:57+00:00"
+      "published": "2026-10-24T04:20:57Z"
     },
     {
       "id": "GQne4mBKS8A",
       "title": "Game Recap: Raptors 112, Wizards 102",
-      "published": "2026-10-24T04:10:03+00:00"
+      "published": "2026-10-24T04:10:03Z"
     },
     {
       "id": "E-M88WzkiZU",
       "title": "Game Recap: Celtics 107, Knicks 103",
-      "published": "2026-10-24T03:36:49+00:00"
+      "published": "2026-10-24T03:36:49Z"
     },
     {
       "id": "JLMUewHUgGo",
       "title": "Game Recap: Hawks 128, Hornets 81",
-      "published": "2026-10-24T03:06:53+00:00"
+      "published": "2026-10-24T03:06:53Z"
     },
     {
       "id": "XQdyiZToOxs",
       "title": "Game Recap: Timberwolves 115, Magic 93",
-      "published": "2026-10-24T02:59:02+00:00"
+      "published": "2026-10-24T02:59:02Z"
     },
     {
       "id": "KIzs3lOiqBw",
       "title": "Game Recap: Bulls 132, Bucks 125",
-      "published": "2026-10-24T00:43:35+00:00"
+      "published": "2026-10-24T00:43:35Z"
     },
     {
       "id": "sLHUcFj98tY",
       "title": "Game Recap: Thunder 96, Nuggets 84",
-      "published": "2026-10-23T06:20:47+00:00"
+      "published": "2026-10-23T06:20:47Z"
     },
     {
       "id": "WEM7bmZMRFA",
       "title": "Game Recap: 76ers 114, Cavaliers 106",
-      "published": "2026-10-23T03:52:10+00:00"
+      "published": "2026-10-23T03:52:10Z"
     },
     {
       "id": "8GVTollw-hY",
       "title": "Game Recap: Los Angeles Lakers 127, Golden State Warriors 105",
-      "published": "2026-10-22T06:51:15+00:00"
+      "published": "2026-10-22T06:51:15Z"
     },
     {
       "id": "q63tEBcu3_s",
       "title": "Game Recap: Clippers 121, Kings 96",
-      "published": "2026-10-22T06:44:09+00:00"
+      "published": "2026-10-22T06:44:09Z"
     },
     {
       "id": "-k5uuFi7Aos",
       "title": "Game Recap: Trail Blazers 124, Suns 83",
-      "published": "2026-10-22T06:34:27+00:00"
+      "published": "2026-10-22T06:34:27Z"
     },
     {
       "id": "0tjcIZ1QfGM",
       "title": "Game Recap: Grizzlies 123, Jazz 103",
-      "published": "2026-10-22T04:59:01+00:00"
+      "published": "2026-10-22T04:59:01Z"
     },
     {
       "id": "6VpFsceImHw",
       "title": "Game Recap: Pacers 123, Pelicans 120",
-      "published": "2026-10-22T04:50:52+00:00"
+      "published": "2026-10-22T04:50:52Z"
     },
     {
       "id": "DqGVzA3kCuI",
       "title": "Game Recap: Hornets 110, Nets 103",
-      "published": "2026-10-22T04:45:24+00:00"
+      "published": "2026-10-22T04:45:24Z"
     },
     {
       "id": "U0sfQsoXv_A",
       "title": "Game Recap: Rockets 128, Mavericks 110",
-      "published": "2026-10-22T04:22:13+00:00"
+      "published": "2026-10-22T04:22:13Z"
     },
     {
       "id": "9L_Kuiq5zuk",
       "title": "Game Recap: Timberwolves 131, Heat 106",
-      "published": "2026-10-22T04:13:16+00:00"
+      "published": "2026-10-22T04:13:16Z"
     },
     {
       "id": "BL8lMLogyis",
       "title": "Game Recap: Raptors 135, Bulls 102",
-      "published": "2026-10-22T04:06:07+00:00"
+      "published": "2026-10-22T04:06:07Z"
     },
     {
       "id": "itD-dZXpz2w",
       "title": "Game Recap: Wizards 128, Bucks 116",
-      "published": "2026-10-22T03:59:05+00:00"
+      "published": "2026-10-22T03:59:05Z"
     },
     {
       "id": "5lO7gTCMhME",
       "title": "Game Recap: Hawks 132, Magic 125",
-      "published": "2026-10-22T03:53:05+00:00"
+      "published": "2026-10-22T03:53:05Z"
     },
     {
       "id": "mopYgbcKFUQ",
       "title": "Game Recap: Thunder 116, Spurs 104",
-      "published": "2026-10-21T06:23:23+00:00"
+      "published": "2026-10-21T06:23:23Z"
     },
     {
       "id": "WU8JO72jdjM",
       "title": "Game Recap: 76ers 106, Knicks 100",
-      "published": "2026-10-21T04:13:55+00:00"
+      "published": "2026-10-21T04:13:55Z"
     },
     {
       "id": "X62uNlsX4tA",
       "title": "Game Recap: Pistons 121, Celtics 113",
-      "published": "2026-10-20T23:29:55+00:00"
+      "published": "2026-10-20T23:29:55Z"
     },
     {
       "id": "D_4Y8jl9jok",
       "title": "Game Recap: Warriors 128, Trail Blazers 118",
-      "published": "2026-10-17T07:17:15+00:00"
+      "published": "2026-10-17T07:17:15Z"
+    },
+    {
+      "id": "YWEUzkzO5oQ",
+      "title": "Game Recap: Nuggets 121, Lakers 106",
+      "published": "2026-10-17T07:08:09Z"
+    },
+    {
+      "id": "jMnFFetsxoI",
+      "title": "Game Recap: Jazz 119, Suns 116",
+      "published": "2026-10-17T06:58:33Z"
+    },
+    {
+      "id": "baI7-grBO3Y",
+      "title": "Game Recap: Hawks 135, Mavericks 111",
+      "published": "2026-10-17T04:18:55Z"
+    },
+    {
+      "id": "x2RzixcRbjg",
+      "title": "Game Recap: Pelicans 107, Wizards 106",
+      "published": "2026-10-17T04:10:18Z"
+    },
+    {
+      "id": "G7XWVjrlqs8",
+      "title": "Game Recap: Bulls 133, Timberwolves 116",
+      "published": "2026-10-17T03:59:00Z"
+    },
+    {
+      "id": "vDjO9kwadAc",
+      "title": "Game Recap: Grizzlies 117, Hornets 98",
+      "published": "2026-10-17T03:44:00Z"
     }
   ]
 }
