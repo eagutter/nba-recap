@@ -20,8 +20,8 @@ API_BASE = "https://www.googleapis.com/youtube/v3/"
 OUTPUT = Path(__file__).with_name("videos.json")
 ATOM = "{http://www.w3.org/2005/Atom}"
 YT = "{http://www.youtube.com/xml/schemas/2015}"
-MAX_VIDEOS = 500
-RETENTION_DAYS = 35
+MAX_VIDEOS = 350
+RETENTION_DAYS = 23
 
 
 def fetch_json(url):

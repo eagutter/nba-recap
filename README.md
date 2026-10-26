@@ -1,14 +1,22 @@
-# NBA Recap
+# NBA Recap — seven game-day history
 
-A compact NBA recap strip for the Firefox new-tab page using **TablissNG**. Displays scores from the **most recent fully completed NBA game day**, with team logos and links to matching [Motion Station](https://www.youtube.com/@motionstation4342/videos) highlights when available. The cards stay on one row; on narrower screens, use the horizontal scrollbar.
+A thin, transparent NBA scores strip for a [TablissNG](https://addons.mozilla.org/en-GB/firefox/addon/tablissng/) Firefox new-tab page, hosted on GitHub Pages.
 
 **Live widget:** https://eagutter.github.io/nba-recap/
 
-## Set up on a new device or browser
+## How to use
 
-1. Install [TablissNG for Firefox](https://addons.mozilla.org/en-GB/firefox/addon/tablissng/), and open a new tab.
-2. In TablissNG, add a **Custom HTML** widget.
-3. Paste the following HTML, save, and position the widget on the new-tab page:
+- Shows the **latest fully completed NBA game day** by default (US Eastern dates).
+- Use the **‹ / › buttons on either side of the date/status label** to visit the previous or next completed game day. Up to **seven game days** are available, skipping days without games. The widget searches up to 21 calendar days back, so off-season gaps may show fewer.
+- Each matchup links **directly to Motion Station's YouTube recap when a verified match is available**. Unlinked cards mean no matching recap has been collected yet.
+- On nights with many games, the cards stay in **one row**, with a thin horizontal scrollbar. The background outside the cards is transparent.
+- Refreshing the page resets to the latest day; automatic 15-minute refreshes preserve your currently selected day.
+
+## Set up on a new computer/browser
+
+1. Install [TablissNG for Firefox](https://addons.mozilla.org/en-GB/firefox/addon/tablissng/).
+2. Open a new tab and add a **Custom HTML** widget.
+3. Paste the code below into that widget and position it where you like:
 
    ```html
    <div style="position:relative;left:50%;width:100vw;transform:translateX(-50%);background:transparent;">
@@ -21,31 +29,27 @@ A compact NBA recap strip for the Firefox new-tab page using **TablissNG**. Disp
    </div>
    ```
 
-That's it! **You don't need to download this repository, run Python, or set up GitHub Pages again.** The site is already hosted; TablissNG just displays it.
+The site is already hosted. No Python, local server, or GitHub setup is needed on each new computer.
 
-If you use a different new-tab extension or browser, the requirement is an HTML widget that permits iframes (or an equivalent embedded web view). The above steps are for Firefox + TablissNG.
+## Updating this repository
 
-## Updating or troubleshooting
+- `index.html`: all visual styling, seven-day navigation, ESPN scores and highlight matching.
+- `update_highlights.py`: downloads recent Motion Station upload IDs/titles; prefers YouTube Data API v3, falls back to RSS, and preserves last good data when neither is available.
+- `videos.json`: generated video cache. Now limited to **23 days / 350 videos**, appropriate for the 21-day score lookback plus upload-date margin. Never hand-edit this file.
+- `.github/workflows/update-highlights.yml`: scheduled updates, roughly every three hours, and GitHub Pages deployment.
 
-- **Change the design/logic:** edit `index.html`, commit to `main`, then check the **Actions** tab for a successful **Update NBA highlights and publish page** run. GitHub Pages should have **Settings → Pages → Source: GitHub Actions**.
-- **Old version still appearing:** refresh [the live widget](https://eagutter.github.io/nba-recap/) with `Ctrl+Shift+R`. In TablissNG, temporarily change the iframe URL to `https://eagutter.github.io/nba-recap/?v=2` to bypass a cached copy (increment the `v` value for later updates).
-- **Too many games for the screen:** drag the thin horizontal scrollbar beneath the cards (or use a horizontal touchpad gesture). The strip never wraps to a second row.
-- **Missing highlight link:** `videos.json` contains recent Motion Station uploads, matched by teams, date, and score where possible. Unmatched games are displayed without a link; videos can appear later.
-- **Automated updates:** `.github/workflows/update-highlights.yml` checks for new videos approximately every three hours, updates `videos.json`, and republishes the site. The updater prunes entries older than 35 days and caps the list at 500; it won't grow without bound.
+To publish a change, commit updated files to `main`, then verify the **Update NBA highlights and publish page** workflow finishes successfully in the [Actions tab](https://github.com/eagutter/nba-recap/actions). **Settings → Pages → Source** should remain **GitHub Actions**.
 
-Scores come from an unofficial ESPN scoreboard endpoint; if that service changes, the widget may need maintenance. The optional YouTube Data API key is stored privately in GitHub Actions; it is never placed in the public webpage.
+## Motion Station API setup (repository owner only)
 
-## Maintainer: configure the reliable Motion Station feed
+GitHub Actions can access YouTube Data API v3 using a repository secret named `YOUTUBE_API_KEY` (never store the key in the repository). Create a restricted key in [Google Cloud Console](https://console.cloud.google.com/) after enabling YouTube Data API v3; add it under **Settings → Secrets and variables → Actions**. The workflow must pass the secret to the updater's `YOUTUBE_API_KEY` environment variable. Without a key it falls back to the YouTube RSS feed, which has been intermittently unavailable.
 
-The public YouTube RSS endpoint sometimes returns HTTP 404, even for a valid channel. To keep Motion Station YouTube links current, the GitHub Action supports YouTube Data API v3 as the primary source, with RSS as the backup. The scores do not require this key.
+Check the job log for `Source: official YouTube Data API` to confirm new videos are being retrieved. A green workflow run can also mean it reused old videos after an upstream failure; check the log and `videos.json`'s latest dates when links are missing.
 
-1. Open [Google Cloud Console](https://console.cloud.google.com/) and create/select a project.
-2. Under **APIs & Services → Library**, enable **YouTube Data API v3**.
-3. Under **APIs & Services → Credentials**, create an **API key**. Restrict it to the **YouTube Data API v3** under API restrictions. Avoid IP/application restrictions, because GitHub Actions runners do not use a fixed outbound IP.
-4. Go to this repo's **Settings → Secrets and variables → Actions → New repository secret**. Name: `YOUTUBE_API_KEY`; value: your API key. Never put the key in a public file or README.
-5. The workflow at `.github/workflows/update-highlights.yml` reads the secret for the `update_highlights.py` step. Go to **Actions → Update NBA highlights and publish page → Run workflow**.
-6. Verify the run log says `Source: official YouTube Data API` and then check that `videos.json` contains recently uploaded videos. Opening the hosted widget should then show direct YouTube links whenever Motion Station has uploaded recaps for those games.
+## Troubleshooting
 
-The updater requests a channel's uploads playlist rather than searching for individual games; this normally uses approximately two low-cost YouTube API requests per check. The script retains a rolling **35-day** history capped at **500 videos**.
-
-If the API becomes unavailable, the workflow retries and falls back to RSS. If neither works, it issues a **GitHub Actions warning** and preserves the old `videos.json`, so the site continues to display scores without inventing links. Green/successful workflow runs do not necessarily mean new highlights were discovered: inspect the log and the latest `videos.json` date.
+- **Old version after a commit:** Wait for deployment to succeed. Then open https://eagutter.github.io/nba-recap/ and press **Ctrl+Shift+R**. If TablissNG still caches it, append `?v=5` to the iframe `src` URL.
+- **Missing scores:** ESPN's unofficial public scoreboard endpoint may be unavailable. The widget checks only fully finished days.
+- **Missing recap:** Motion Station may not have posted it, or the video may not have been collected/matched yet. Look for recent entries in `videos.json` and verify GitHub Actions logs.
+- **Can't see all cards:** Use the slim horizontal scrollbar. Cards do not wrap onto a second row.
+- **No arrows:** Refresh to the latest HTML and ensure the whole 180px-high iframe is visible in TablissNG.

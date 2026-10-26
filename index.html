@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>NBA · Last completed game day</title>
+  <title>NBA · Last seven completed game days</title>
   <style>
     :root { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
     *, *::before, *::after { box-sizing: border-box; }
@@ -93,6 +93,18 @@
       text-shadow: 0 1px 7px rgba(0,0,0,.95);
     }
     #status:empty { display: none; }
+    #navigation { display: flex; align-items: center; justify-content: center; gap: 9px; min-height: 20px; max-width: 100%; }
+    #navigation[hidden] { display: none; }
+    .day-arrow {
+      display: grid; place-items: center; flex: 0 0 24px;
+      width: 24px; height: 23px; padding: 0;
+      color: rgba(255,255,255,.92); font: 23px/1 system-ui, sans-serif;
+      border: 0; border-radius: 6px; background: rgba(18,22,31,.40);
+      cursor: pointer; transition: background .15s ease;
+    }
+    .day-arrow:hover:not(:disabled) { background: rgba(50,60,80,.85); }
+    .day-arrow:focus-visible { outline: 2px solid #bfe2ff; outline-offset: 2px; }
+    .day-arrow:disabled { opacity: .28; cursor: default; background: transparent; }
     #message {
       display: none; max-width: 90%; padding: 10px 14px;
       font-size: 13px; text-align: center;
@@ -103,24 +115,30 @@
   </style>
 </head>
 <body>
-  <main id="widget" aria-label="NBA results from the last completed game day">
+  <main id="widget" aria-label="NBA results from the last seven completed game days">
     <div id="games" aria-live="polite"></div>
-    <div id="status" role="status">Loading NBA scores…</div>
+    <div id="navigation">
+      <button type="button" class="day-arrow" id="older" aria-label="Previous NBA game day" title="Previous NBA game day" disabled>‹</button>
+      <div id="status" role="status">Loading NBA scores…</div>
+      <button type="button" class="day-arrow" id="newer" aria-label="Next NBA game day" title="Next NBA game day" disabled>›</button>
+    </div>
     <div id="message" role="alert"></div>
   </main>
   <script>
     "use strict";
-    const DAYS_TO_CHECK = 14;
+    const GAME_DAYS_TO_SHOW = 7;
+    const DAYS_TO_CHECK = 21; // Search far enough back to include weekends and occasional off days.
     const CACHE_MINUTES = 15;
+    const SCORES_CACHE_KEY = "nba-recap-game-days-v1";
     const ESPN_URL = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard";
     const gamesElement = document.getElementById("games");
     const statusElement = document.getElementById("status");
     const messageElement = document.getElementById("message");
-
-    // The scheduled GitHub Action reads the public YouTube RSS feed and
-    // saves verified Motion Station video IDs into videos.json.
-    const motionStationChannel = "https://www.youtube.com/@motionstation4342/videos";
-    let lastRenderedEvents = [];
+    const olderButton = document.getElementById("older");
+    const newerButton = document.getElementById("newer");
+    let recentDays = [];
+    let recentVideos = [];
+    let selectedDateKey = null;
 
     function easternTodayUTC() {
       const parts = new Intl.DateTimeFormat("en-GB", {
@@ -147,33 +165,52 @@
       return body.events;
     }
 
-    async function findLastFinishedDay() {
+    async function findRecentFinishedDays() {
       const todayET = easternTodayUTC();
       try {
-        const cached = JSON.parse(localStorage.getItem("nba-recap-v2"));
+        const cached = JSON.parse(localStorage.getItem(SCORES_CACHE_KEY));
         if (cached?.todayKey === dateKey(todayET) &&
             Date.now() - cached.savedAt < CACHE_MINUTES * 60000 &&
-            Array.isArray(cached.events)) {
-          return { date: cached.date ? new Date(cached.date + "T00:00:00Z") : null,
-                   events: cached.events };
+            Array.isArray(cached.days)) {
+          return cached.days.map(day => ({
+            date: new Date(day.date + "T00:00:00Z"), events: day.events
+          })).filter(day => !Number.isNaN(day.date.getTime()) && Array.isArray(day.events));
         }
-      } catch (_) { /* Private/extension contexts can block storage. */ }
+      } catch (_) { /* Optional cache, potentially blocked in an iframe. */ }
 
-      for (let offset=1; offset<=DAYS_TO_CHECK; offset++) {
-        const date = new Date(todayET.getTime() - offset*86400000);
-        const events = await fetchOneDay(date);
-        if (!events.length || !events.every(completeGame)) continue;
+      const days = [];
+      let errors = 0;
+      // Request up to seven dates concurrently. Stop as soon as we have
+      // seven fully finished game days; never include scheduled/live games.
+      for (let start = 1; start <= DAYS_TO_CHECK && days.length < GAME_DAYS_TO_SHOW; start += 7) {
+        const offsets = Array.from({ length: Math.min(7, DAYS_TO_CHECK - start + 1) }, (_, i) => start + i);
+        const batch = await Promise.all(offsets.map(async offset => {
+          const date = new Date(todayET.getTime() - offset * 86400000);
+          try {
+            return { date, events: await fetchOneDay(date) };
+          } catch (error) {
+            errors++;
+            console.warn("Unable to read NBA scores for", dateKey(date), error);
+            return null;
+          }
+        }));
+        for (const day of batch) {
+          if (day && day.events.length && day.events.every(completeGame)) days.push(day);
+          if (days.length === GAME_DAYS_TO_SHOW) break;
+        }
+      }
+      if (!days.length && errors) throw new Error("Could not retrieve completed NBA scores");
+      // Keep historical scores for a short time; the highlight list is fetched separately.
+      if (!errors) {
         try {
-          localStorage.setItem("nba-recap-v2", JSON.stringify({
-            todayKey: dateKey(todayET), date: date.toISOString().slice(0,10),
-            savedAt: Date.now(), events
+          localStorage.setItem(SCORES_CACHE_KEY, JSON.stringify({
+            todayKey: dateKey(todayET), savedAt: Date.now(),
+            days: days.map(d => ({ date: d.date.toISOString().slice(0, 10), events: d.events }))
           }));
         } catch (_) { /* Optional cache. */ }
-        return { date, events };
       }
-      return { date: null, events: [] };
+      return days;
     }
-
     async function fetchMotionStationVideos() {
       try {
         const cacheBuster = Math.floor(Date.now() / (15*60*1000));
@@ -287,7 +324,7 @@
       messageElement.style.display = "none";
       messageElement.textContent = "";
       if (!date || !events.length) {
-        statusElement.textContent = "No completed NBA game day in the last 14 days";
+        statusElement.textContent = `No completed NBA game day in the last ${DAYS_TO_CHECK} days`;
         return;
       }
       let linked = 0;
@@ -322,12 +359,32 @@
       fitCards();
       const n = gamesElement.children.length;
       statusElement.textContent = n
-        ? `NBA · ${readableDate(date)} · Final · ${linked ? linked + " highlight" + (linked === 1 ? "" : "s") + " linked" : "Highlights pending"}`
+        ? `NBA · ${readableDate(date)} · Final · Day ${recentDays.findIndex(d => dateKey(d.date) === dateKey(date)) + 1}/${recentDays.length} · ${linked ? linked + " highlight" + (linked === 1 ? "" : "s") + " linked" : "Highlights pending"}`
         : "No NBA scores found";
     }
 
+    function displaySelectedDay() {
+      const position = recentDays.findIndex(day => dateKey(day.date) === selectedDateKey);
+      const index = position < 0 ? 0 : position;
+      olderButton.disabled = !recentDays.length || index >= recentDays.length - 1;
+      newerButton.disabled = !recentDays.length || index <= 0;
+      displayDay(recentDays[index] || { date: null, events: [] }, recentVideos);
+      gamesElement.scrollLeft = 0;
+    }
+    function moveDay(direction) {
+      const index = recentDays.findIndex(day => dateKey(day.date) === selectedDateKey);
+      const next = index + direction;
+      if (next < 0 || next >= recentDays.length) return;
+      selectedDateKey = dateKey(recentDays[next].date);
+      displaySelectedDay();
+    }
+    olderButton.addEventListener("click", () => moveDay(1));
+    newerButton.addEventListener("click", () => moveDay(-1));
+
     function showError(error) {
       gamesElement.replaceChildren();
+      olderButton.disabled = true;
+      newerButton.disabled = true;
       statusElement.textContent = "NBA · Scores unavailable";
       messageElement.textContent = "Could not load scores. ";
       const retry = document.createElement("a");
@@ -337,13 +394,19 @@
       messageElement.style.display = "block";
       console.error("NBA widget error:", error);
     }
-
     async function load() {
       try {
-        const [result, videos] = await Promise.all([
-          findLastFinishedDay(), fetchMotionStationVideos()
+        const [days, videos] = await Promise.all([
+          findRecentFinishedDays(), fetchMotionStationVideos()
         ]);
-        displayDay(result, videos);
+        recentDays = days;
+        recentVideos = videos;
+        // On first load start at the latest completed day. During the
+        // 15-minute refresh, preserve the date someone is browsing.
+        if (!recentDays.some(day => dateKey(day.date) === selectedDateKey)) {
+          selectedDateKey = recentDays[0] ? dateKey(recentDays[0].date) : null;
+        }
+        displaySelectedDay();
       } catch (error) { showError(error); }
     }
     window.addEventListener("resize", fitCards);
