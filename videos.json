@@ -1,7 +1,22 @@
 {
   "channel": "Motion Station",
-  "updated_at": "2026-11-02T00:40:02+00:00",
+  "updated_at": "2026-11-02T10:56:47+00:00",
   "videos": [
+    {
+      "id": "aFpJ0mzIU08",
+      "title": "Game Recap: Lakers 131, Raptors 125",
+      "published": "2026-11-02T06:22:12Z"
+    },
+    {
+      "id": "rESxdkefiPk",
+      "title": "Game Recap:  Warriors 124, Clippers 112",
+      "published": "2026-11-02T06:21:47Z"
+    },
+    {
+      "id": "EkTaxIfVjio",
+      "title": "Game Recap: Nets 98, Pacers 90",
+      "published": "2026-11-02T04:47:31Z"
+    },
     {
       "id": "p0yT-YzVtUc",
       "title": "Game Recap: Celtics 108, Magic 97",
