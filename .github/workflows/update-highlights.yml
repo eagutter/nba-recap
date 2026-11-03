@@ -4,7 +4,11 @@ on:
   push:
     branches: [main]
   schedule:
+    # Standard refresh every three hours (GitHub Actions cron uses UTC).
     - cron: '15 */3 * * *'
+    # Extra morning checks for late West Coast NBA recap uploads.
+    - cron: '35 7 * * *'
+    - cron: '20 8 * * *'
   workflow_dispatch:
 
 permissions:
