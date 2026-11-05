@@ -1,6 +1,6 @@
 {
   "channel": "Motion Station",
-  "updated_at": "2026-11-05T10:34:03+00:00",
+  "updated_at": "2026-11-05T10:50:37+00:00",
   "videos": [
     {
       "id": "cy-oXSZA7SI",
@@ -647,5 +647,9 @@
       "title": "Game Recap: Grizzlies 117, Hornets 98",
       "published": "2026-10-17T03:44:00Z"
     }
-  ]
+  ],
+  "channel_cache": {
+    "uploads_playlist_id": "UULd4dSmXdrJykO_hgOzbfPw",
+    "checked_at": "2026-11-05T10:50:37+00:00"
+  }
 }
