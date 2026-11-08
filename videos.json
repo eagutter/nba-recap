@@ -1,7 +1,37 @@
 {
   "channel": "Motion Station",
-  "updated_at": "2026-11-08T02:20:20+00:00",
+  "updated_at": "2026-11-08T10:10:02+00:00",
   "videos": [
+    {
+      "id": "avmUWP6JNY4",
+      "title": "Game Recap: Spurs 125, Trail Blazers 103 (Nov. 7)",
+      "published": "2026-11-08T07:47:32Z"
+    },
+    {
+      "id": "Ke0gVCBKZD0",
+      "title": "Game Recap: Warriors 126, Magic 119 (Nov. 7)",
+      "published": "2026-11-08T07:43:22Z"
+    },
+    {
+      "id": "yZin8FioOMs",
+      "title": "Game Recap: Thunder 114, Wizards 75 (Nov. 7)",
+      "published": "2026-11-08T07:09:30Z"
+    },
+    {
+      "id": "6MzoZWZ4NYY",
+      "title": "Game Recap: Suns 102, Rockets 99 (Nov. 7)",
+      "published": "2026-11-08T07:07:00Z"
+    },
+    {
+      "id": "Ckg_AT9sfG4",
+      "title": "Game Recap: Knicks 109, Cavaliers 97 (Nov. 7)",
+      "published": "2026-11-08T05:27:01Z"
+    },
+    {
+      "id": "8aZMEsZy7f0",
+      "title": "Game Recap: Hawks 124, Nets 121 (Nov. 7)",
+      "published": "2026-11-08T04:27:49Z"
+    },
     {
       "id": "gJlywCBLhUQ",
       "title": "Game Recap: Nuggets 114, Pacers 102 (Nov. 7)",
