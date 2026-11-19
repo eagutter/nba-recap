@@ -1,6 +1,6 @@
 {
   "channel": "Motion Station",
-  "updated_at": "2026-11-18T13:48:31+00:00",
+  "updated_at": "2026-11-19T03:12:06+00:00",
   "videos": [
     {
       "id": "d3pGYvHvZVU",
@@ -836,20 +836,10 @@
       "id": "lGGYctEeUyw",
       "title": "Game Recap: Celtics 134, Bulls 99",
       "published": "2026-10-27T03:29:36Z"
-    },
-    {
-      "id": "TZnDEsGXAzY",
-      "title": "Game Recap: Cavaliers 127, Timberwolves 125",
-      "published": "2026-10-27T03:07:46Z"
-    },
-    {
-      "id": "JQv1Cs0VhoY",
-      "title": "Game Recap: Hornets 110, Wizards 103",
-      "published": "2026-10-27T02:43:53Z"
     }
   ],
   "channel_cache": {
     "uploads_playlist_id": "UULd4dSmXdrJykO_hgOzbfPw",
-    "checked_at": "2026-11-17T22:11:41+00:00"
+    "checked_at": "2026-11-19T03:12:06+00:00"
   }
 }
