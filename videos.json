@@ -1,7 +1,27 @@
 {
   "channel": "Motion Station",
-  "updated_at": "2026-11-19T12:50:47+00:00",
+  "updated_at": "2026-11-20T11:22:03+00:00",
   "videos": [
+    {
+      "id": "x9yuhkmxDmg",
+      "title": "Game Recap: Trail Blazers 124, Bucks 114 (Nov. 19)",
+      "published": "2026-11-20T06:03:17Z"
+    },
+    {
+      "id": "9Qs4slsyhZM",
+      "title": "Game Recap: Spurs 124, Clippers 112 (Nov. 19)",
+      "published": "2026-11-20T05:25:08Z"
+    },
+    {
+      "id": "SM8uhF8jqAM",
+      "title": "Game Recap: Grizzlies 126, Warriors 98 (Nov. 19)",
+      "published": "2026-11-20T05:16:16Z"
+    },
+    {
+      "id": "TYS_1aZAlno",
+      "title": "Game Recap: Knicks 102, Timberwolves 99 (Nov. 19)",
+      "published": "2026-11-20T05:00:25Z"
+    },
     {
       "id": "6gCtCUXpNEk",
       "title": "Game Recap: Jazz 109, Lakers 97 (Nov. 18)",
@@ -841,30 +861,10 @@
       "id": "W7qu6CqYw6U",
       "title": "Game Recap: Pistons 97, Hornets 89",
       "published": "2026-10-29T03:06:09Z"
-    },
-    {
-      "id": "Efw5MopvxDE",
-      "title": "Game Recap: Trail Blazers 136, Lakers 129",
-      "published": "2026-10-28T07:49:18Z"
-    },
-    {
-      "id": "qE8I7AkKn7I",
-      "title": "Game Recap: Knicks 111, Pistons 97",
-      "published": "2026-10-28T05:33:51Z"
-    },
-    {
-      "id": "Y9mLOcmkGRA",
-      "title": "Game Recap: Celtics 125, Nets 124",
-      "published": "2026-10-28T05:25:12Z"
-    },
-    {
-      "id": "nG5gfkxPifY",
-      "title": "Game Recap: Spurs 130, Kings 103",
-      "published": "2026-10-28T05:07:50Z"
     }
   ],
   "channel_cache": {
     "uploads_playlist_id": "UULd4dSmXdrJykO_hgOzbfPw",
-    "checked_at": "2026-11-19T03:12:06+00:00"
+    "checked_at": "2026-11-20T11:22:03+00:00"
   }
 }
