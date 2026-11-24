@@ -1,4 +1,4 @@
-"""Collect recent Motion Station uploads for the NBA Recap widget.
+"""Collect Motion Station game highlights and official NBA Nightly Recaps.
 
 Uses the YouTube Data API when YOUTUBE_API_KEY is configured and falls back
 on the public RSS feed if unavailable. Keeps the uploads playlist ID in the
@@ -6,7 +6,9 @@ existing videos.json file, checking the channel API once every 24 hours.
 No additional GitHub workflow or scheduled job is needed.
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
+import re
 import json
 import os
 from pathlib import Path
@@ -188,32 +190,251 @@ def merge_videos(old_videos, new_videos, now):
     return sorted(saved, key=lambda video: video["published"], reverse=True)[:MAX_VIDEOS]
 
 
+# The official NBA YouTube channel, separate from Motion Station.
+NBA_CHANNEL_ID = "UCWJ2lWNubArHWmf3FIHbfcQ"
+NBA_RETENTION_DAYS = 23
+NBA_MAX_PLAYLIST_PAGES = 8  # Enough for a full regular-season recap playlist.
+NBA_MAX_DISCOVERY_PAGES = 20
+NBA_MAX_UPLOAD_PAGES = 20  # Bounded fallback/backfill if the playlist is unavailable.
+MONTHS = {name: n for n, name in enumerate(
+    ("january", "february", "march", "april", "may", "june", "july", "august",
+     "september", "october", "november", "december"), 1)}
+MONTHS.update({name[:3]: n for name, n in list(MONTHS.items())})
+MONTHS["sept"] = 9
+TITLE_RE = re.compile(
+    r"^NBA(?:['’]s)?\s+Nightly\s+Recap\s*(?:[|:–—-]\s*)?"
+    r"([A-Za-z]+)\.?\s+(\d{1,2}),?\s+(\d{4})\s*$", re.I)
+VIDEO_ID_RE = re.compile(r"[A-Za-z0-9_-]{11}\Z")
+
+
+def recap_date(title):
+    """Use the game date printed in the title, not the upload date."""
+    m = TITLE_RE.fullmatch(title.strip()) if isinstance(title, str) else None
+    if not m:
+        return None
+    try:
+        return date(int(m[3]), MONTHS[m[1].lower()], int(m[2]))
+    except (ValueError, KeyError):
+        return None
+
+
+def nba_game_today(now):
+    return now.astimezone(ZoneInfo("America/New_York")).date()
+
+
+def season_label(now):
+    today = nba_game_today(now)
+    start = today.year if today.month >= 7 else today.year - 1
+    return f"{start}-{(start + 1) % 100:02d}"
+
+
+def recap_record(item, now, curated=False):
+    snippet = item.get("snippet", {})
+    details = item.get("contentDetails", {})
+    owner = snippet.get("videoOwnerChannelId")
+    # For curated playlists require the video itself to belong to @NBA.
+    # The uploads playlist is already restricted to that channel.
+    if (curated and owner != NBA_CHANNEL_ID) or (owner and owner != NBA_CHANNEL_ID):
+        return None
+    title = snippet.get("title", "")
+    day = recap_date(title)
+    video_id = details.get("videoId") or snippet.get("resourceId", {}).get("videoId")
+    published = details.get("videoPublishedAt") or snippet.get("publishedAt")
+    if (not day or not isinstance(video_id, str) or not VIDEO_ID_RE.fullmatch(video_id)
+            or not parse_time(published)):
+        return None
+    today = nba_game_today(now)
+    if not today - timedelta(days=NBA_RETENTION_DAYS) <= day <= today:
+        return None
+    return day.isoformat(), {"id": video_id, "title": title, "published": published}
+
+
+def discover_nba_playlists(api_key, now, old_cache):
+    """Find the official uploads playlist and the current season's recap playlist."""
+    result = api_call(api_key, "channels", part="contentDetails", id=NBA_CHANNEL_ID)
+    channels = result.get("items", [])
+    if not channels or channels[0].get("id") != NBA_CHANNEL_ID:
+        raise ValueError("Official NBA channel not returned")
+    uploads = channels[0]["contentDetails"]["relatedPlaylists"]["uploads"]
+    if not isinstance(uploads, str) or not uploads:
+        raise ValueError("Official NBA uploads playlist not returned")
+    season = season_label(now)
+    token = None
+    found = None
+    try:
+        for _ in range(NBA_MAX_DISCOVERY_PAGES):
+            args = dict(part="snippet", channelId=NBA_CHANNEL_ID, maxResults=50)
+            if token:
+                args["pageToken"] = token
+            result = api_call(api_key, "playlists", **args)
+            for item in result.get("items", []):
+                snippet = item.get("snippet", {})
+                title = str(snippet.get("title", "")).lower().replace("–", "-").replace("—", "-")
+                if (snippet.get("channelId") == NBA_CHANNEL_ID and "nightly recap" in title
+                        and season in title and isinstance(item.get("id"), str)):
+                    found = item["id"]
+                    break
+            token = result.get("nextPageToken")
+            if found or not token:
+                break
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        print(f"::warning title=NBA playlist discovery::Using uploads fallback ({type(exc).__name__})", flush=True)
+        # Keep a previously verified seasonal playlist on temporary discovery errors.
+        if old_cache.get("season") == season:
+            found = old_cache.get("recap_playlist_id")
+    print(f"Official NBA channel verified; season {season}; recap playlist {'found' if found else 'not found (uploads fallback)'}", flush=True)
+    return {"uploads_playlist_id": uploads, "recap_playlist_id": found,
+            "season": season, "checked_at": now.isoformat(timespec="seconds"),
+            "backfill_at": old_cache.get("backfill_at")}
+
+
+def scan_nba_playlist(api_key, playlist_id, now, pages, curated=False):
+    """Scan pages without assuming a curated playlist is newest-first."""
+    token = None
+    records = {}
+    cutoff = nba_game_today(now) - timedelta(days=NBA_RETENTION_DAYS + 2)
+    finished = False
+    for _ in range(pages):
+        args = dict(part="snippet,contentDetails", playlistId=playlist_id, maxResults=50)
+        if token:
+            args["pageToken"] = token
+        result = api_call(api_key, "playlistItems", **args)
+        items = result.get("items")
+        if not isinstance(items, list):
+            raise ValueError("Unexpected NBA playlist response")
+        dates = []
+        for item in items:
+            record = recap_record(item, now, curated=curated)
+            if record:
+                key, video = record
+                if key not in records or parse_time(video["published"]) > parse_time(records[key]["published"]):
+                    records[key] = video
+            dt = parse_time(item.get("contentDetails", {}).get("videoPublishedAt") or
+                            item.get("snippet", {}).get("publishedAt"))
+            if dt:
+                dates.append(dt.date())
+        token = result.get("nextPageToken")
+        if not token or (not curated and items and len(dates) == len(items) and max(dates) < cutoff):
+            finished = True
+            break
+    return records, finished
+
+
+def merge_recaps(old, new, now):
+    today = nba_game_today(now)
+    merged = {}
+    for collection in (old, new):
+        if not isinstance(collection, dict):
+            continue
+        for key, value in collection.items():
+            if not isinstance(value, dict):
+                continue
+            day = recap_date(value.get("title"))
+            if (not day or key != day.isoformat() or not today - timedelta(days=NBA_RETENTION_DAYS) <= day <= today
+                    or not isinstance(value.get("id"), str) or not VIDEO_ID_RE.fullmatch(value["id"])
+                    or not parse_time(value.get("published"))):
+                continue
+            if key not in merged or parse_time(value["published"]) >= parse_time(merged[key]["published"]):
+                merged[key] = value
+    return dict(sorted(merged.items(), reverse=True))
+
+
+def collect_nightly(api_key, old_cache, old_recaps, now):
+    """Poll the seasonal playlist and latest official uploads; backfill if needed."""
+    if not api_key:
+        print("::warning title=NBA Nightly Recap::YOUTUBE_API_KEY is required; preserving existing nightly recaps", flush=True)
+        return None, old_cache
+    cache = old_cache.copy() if isinstance(old_cache, dict) else {}
+    checked = parse_time(cache.get("checked_at"))
+    if (not cache.get("uploads_playlist_id") or not checked or now - checked >= CHANNEL_CHECK_INTERVAL
+            or cache.get("season") != season_label(now)):
+        try:
+            cache = discover_nba_playlists(api_key, now, cache)
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            print(f"::warning title=NBA channel check failed::{type(exc).__name__}; retaining cached metadata", flush=True)
+    records = {}
+    success = False
+    complete = False
+    pid = cache.get("recap_playlist_id") if cache.get("season") == season_label(now) else None
+    if pid:
+        try:
+            records, complete = scan_nba_playlist(api_key, pid, now, NBA_MAX_PLAYLIST_PAGES, curated=True)
+            success = True
+            if not records:
+                complete = False
+                print("::warning title=NBA recap playlist::No recent official recaps found; checking uploads", flush=True)
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            print(f"::warning title=NBA recap playlist failed::{type(exc).__name__}; checking uploads", flush=True)
+            # Force rediscovery next run after a stale/invalid playlist.
+            cache.pop("checked_at", None)
+    # A fresh upload can arrive before it is added to the seasonal playlist.
+    # Scan 2 recent upload pages each hour, and do a bounded daily backfill
+    # when the curated playlist is unavailable or incomplete.
+    last_backfill = parse_time(cache.get("backfill_at"))
+    full_scan = not complete and (not old_recaps or not last_backfill or now - last_backfill >= CHANNEL_CHECK_INTERVAL)
+    if cache.get("uploads_playlist_id"):
+        try:
+            more, exhausted = scan_nba_playlist(api_key, cache["uploads_playlist_id"], now,
+                                                NBA_MAX_UPLOAD_PAGES if full_scan else 2)
+            records = merge_recaps(records, more, now)
+            success = True
+            if full_scan:
+                cache["backfill_at"] = now.isoformat(timespec="seconds")
+                if not exhausted:
+                    print("::warning title=NBA backfill limit::Reached bounded uploads scan; some older recaps may not be found", flush=True)
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            print(f"::warning title=NBA uploads failed::{type(exc).__name__}; preserving saved recaps", flush=True)
+            cache.pop("checked_at", None)
+    if not success:
+        return None, cache
+    print(f"Official NBA Nightly Recap: {len(records)} recent game dates found", flush=True)
+    return records, cache
+
+
 def main():
     now = datetime.now(timezone.utc)
-    old, previous_update, old_cache = read_existing()
-    fresh, new_cache = collect_videos(os.environ.get("YOUTUBE_API_KEY", "").strip(), old_cache, now)
-
+    # Keep the existing Motion Station JSON shape; nightly recaps are separate.
+    try:
+        data = json.loads(OUTPUT.read_text(encoding="utf-8")) if OUTPUT.exists() else {}
+        if not isinstance(data, dict):
+            raise ValueError("Expected JSON object")
+    except (OSError, ValueError):
+        # Never silently overwrite a corrupt cache.
+        raise RuntimeError("Cannot read existing videos.json; leaving it unchanged") from None
+    old = data.get("videos", [])
+    if not isinstance(old, list):
+        raise ValueError("Invalid existing Motion Station video list")
+    old_cache = data.get("channel_cache", {})
+    if not isinstance(old_cache, dict):
+        old_cache = {}
+    old_recaps = data.get("nightly_recaps", {})
+    old_nba_cache = data.get("nba_channel_cache", {})
+    api_key = os.environ.get("YOUTUBE_API_KEY", "").strip()
+    fresh, new_cache = collect_videos(api_key, old_cache, now)
+    recaps, nba_cache = collect_nightly(api_key, old_nba_cache, old_recaps, now)
     if fresh is None:
-        if old:
-            print("::warning title=Highlights are stale::YouTube API/RSS unavailable; retaining existing videos.json.", flush=True)
-            return
-        raise RuntimeError("Could not fetch YouTube uploads and videos.json has no previous entries")
-
-    videos = merge_videos(old, fresh, now)
-    if not videos:
-        raise RuntimeError("No valid recent uploads; leaving videos.json unchanged")
-
-    last_update = parse_time(previous_update) or now - timedelta(days=40)
-    changed = (videos != old or new_cache != old_cache
-               or now - last_update > timedelta(days=21))
-    updated_at = now.isoformat(timespec="seconds") if changed else previous_update
-
+        print("::warning title=Motion Station highlights stale::Keeping cached game highlights", flush=True)
+        videos = old
+    else:
+        videos = merge_videos(old, fresh, now)
+    if recaps is None:
+        print("::warning title=Nightly recaps stale::Keeping cached official recaps", flush=True)
+    nightly = merge_recaps(old_recaps, recaps or {}, now)
+    if fresh is None and recaps is None and not old and not nightly:
+        raise RuntimeError("Neither source available and no cached highlights exist")
+    updated = dict(data)
+    updated.update(channel="Motion Station", videos=videos, channel_cache=new_cache,
+                   nightly_recaps=nightly, nba_channel_cache=nba_cache)
+    if videos != old or (fresh is not None and not data.get("updated_at")):
+        updated["updated_at"] = now.isoformat(timespec="seconds")
+    if nightly != old_recaps or (recaps is not None and not data.get("nightly_updated_at")):
+        updated["nightly_updated_at"] = now.isoformat(timespec="seconds")
+    changed = updated != data
     if changed:
-        data = {"channel": "Motion Station", "updated_at": updated_at, "videos": videos}
-        if new_cache:
-            data["channel_cache"] = new_cache
-        OUTPUT.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    print(f"Saved {len(videos)} recent uploads; changed: {changed}", flush=True)
+        tmp = OUTPUT.with_suffix(".json.tmp")
+        tmp.write_text(json.dumps(updated, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        tmp.replace(OUTPUT)
+    print(f"Saved {len(videos)} Motion Station uploads and {len(nightly)} official nightly recaps; changed: {changed}", flush=True)
 
 
 if __name__ == "__main__":

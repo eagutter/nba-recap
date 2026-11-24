@@ -1,55 +1,55 @@
-# NBA Recap — seven game-day history
+# NBA Recap
 
-A thin, transparent NBA scores strip for a [TablissNG](https://addons.mozilla.org/en-GB/firefox/addon/tablissng/) Firefox new-tab page, hosted on GitHub Pages.
+Compact NBA results for a Firefox/TablissNG new tab. Shows the latest fully completed NBA game day and lets you browse the last seven completed game days (skipping dates without games). Individual cards link to Motion Station's short recaps when matched. The **Nightly Recap** button opens the official NBA YouTube channel's combined recap for the date displayed, when available. The date footer stays minimal; the scores stay in a single row, with horizontal scrolling on narrow screens.
 
 **Live widget:** https://eagutter.github.io/nba-recap/
 
-## How to use
-
-- Shows the **latest fully completed NBA game day** by default (US Eastern dates).
-- Use the **‹ / › buttons on either side of the date/status label** to visit the previous or next completed game day. Up to **seven game days** are available, skipping days without games. The widget searches up to 21 calendar days back, so off-season gaps may show fewer.
-- Each matchup links **directly to Motion Station's YouTube recap when a verified match is available**. Unlinked cards mean no matching recap has been collected yet.
-- On nights with many games, the cards stay in **one row**, with a thin horizontal scrollbar. The background outside the cards is transparent.
-- Refreshing the page resets to the latest day; automatic 15-minute refreshes preserve your currently selected day.
-
-## Set up on a new computer/browser
+## Set up on another device or browser
 
 1. Install [TablissNG for Firefox](https://addons.mozilla.org/en-GB/firefox/addon/tablissng/).
-2. Open a new tab and add a **Custom HTML** widget.
-3. Paste the code below into that widget and position it where you like:
+2. Open a new tab, enter TablissNG settings and add a **Custom HTML** widget.
+3. Paste the following code, save and position the widget:
 
-   ```html
-   <div style="position:relative;left:50%;width:100vw;transform:translateX(-50%);background:transparent;">
-     <iframe
-       src="https://eagutter.github.io/nba-recap/"
-       title="NBA Recap"
-       scrolling="no"
-       style="display:block;width:100%;height:180px;margin:0;padding:0;border:0;background:transparent;overflow:hidden;"
-     ></iframe>
-   </div>
-   ```
+```html
+<div style="position:relative;left:50%;width:100vw;transform:translateX(-50%);background:transparent;">
+  <iframe
+    src="https://eagutter.github.io/nba-recap/"
+    title="NBA Recap"
+    scrolling="no"
+    style="display:block;width:100%;height:180px;margin:0;padding:0;border:0;background:transparent;overflow:hidden;"
+  ></iframe>
+</div>
+```
 
-The site is already hosted. No Python, local server, or GitHub setup is needed on each new computer.
+No new GitHub repository, API key, Python installation or hosting setup is needed on a new device. Another new-tab extension may also work if it supports HTML iframes.
 
-## Updating this repository
+## Install the Nightly Recap update (existing repository)
 
-- `index.html`: all visual styling, seven-day navigation, ESPN scores and highlight matching.
-- `update_highlights.py`: downloads recent Motion Station upload IDs/titles; prefers YouTube Data API v3, falls back to RSS, and preserves last good data when neither is available.
-- `videos.json`: generated video cache. Now limited to **23 days / 350 videos**, appropriate for the 21-day score lookback plus upload-date margin. Never hand-edit this file.
-- `.github/workflows/update-highlights.yml`: scheduled updates, roughly every three hours, and GitHub Pages deployment.
+1. Extract the update ZIP. Go to https://github.com/eagutter/nba-recap and open the root of the `main` branch.
+2. Select **Add file → Upload files**. Upload the three files `index.html`, `update_highlights.py` and `README.md` together, replacing their current versions. Do **not** upload a blank or replacement `videos.json`; the updater migrates the existing cache automatically.
+3. Click **Commit changes**, committing directly to `main`. The existing workflow should start automatically. The included `.github/workflows/update-highlights.yml` is a reference copy of the existing hourly workflow; it does not need replacing.
+4. Open https://github.com/eagutter/nba-recap/actions and check the latest run of **Update NBA highlights and publish page**. The existing step named “Read Motion Station uploads” now collects both sources. Its log should include `Official NBA Nightly Recap: ... recent game dates found` and `Saved ... official nightly recaps`. A first run may take longer because it also discovers the seasonal playlist and backfills history. If no run starts, open the workflow and click **Run workflow**.
+5. After a successful deployment, open https://eagutter.github.io/nba-recap/?v=nightly and test the Nightly Recap button for several dates. The link should open the exact date's official NBA video in a new tab. Refresh TablissNG; if stale, append `?v=nightly` to its iframe URL. No other iframe changes are required.
 
-To publish a change, commit updated files to `main`, then verify the **Update NBA highlights and publish page** workflow finishes successfully in the [Actions tab](https://github.com/eagutter/nba-recap/actions). **Settings → Pages → Source** should remain **GitHub Actions**.
+## Using the widget
 
-## Motion Station API setup (repository owner only)
+- Left arrow: older completed game day. Right arrow: newer completed game day. The latest completed day opens by default.
+- Click a game card to watch its Motion Station recap (if available).
+- Click **Nightly Recap** to watch the combined official NBA recap for the selected date. The button is hidden until an exact date match exists; no search links or guesses.
+- If games do not fit horizontally, use the thin scrollbar or a horizontal touchpad gesture.
 
-GitHub Actions can access YouTube Data API v3 using a repository secret named `YOUTUBE_API_KEY` (never store the key in the repository). Create a restricted key in [Google Cloud Console](https://console.cloud.google.com/) after enabling YouTube Data API v3; add it under **Settings → Secrets and variables → Actions**. The workflow must pass the secret to the updater's `YOUTUBE_API_KEY` environment variable. Without a key it falls back to the YouTube RSS feed, which has been intermittently unavailable.
+## How updates work
 
-Check the job log for `Source: official YouTube Data API` to confirm new videos are being retrieved. A green workflow run can also mean it reused old videos after an upstream failure; check the log and `videos.json`'s latest dates when links are missing.
+- ESPN's unofficial scoreboard API supplies completed game scores. The widget checks up to 21 calendar days to find seven completed game days.
+- GitHub Actions is scheduled at minute 7 of every hour (UTC) and on commits to `main`; scheduled runs can be delayed or missed by GitHub. A manual run is also available. Pages uses **Settings → Pages → Source: GitHub Actions**.
+- The existing repository secret `YOUTUBE_API_KEY` supplies the YouTube Data API key for both channels. Never put the key in HTML, JSON, or a public source file.
+- Motion Station: fetches up to 50 upload records per run; verifies its channel metadata daily and falls back to RSS when necessary. Retains up to 350 videos from the last 23 days.
+- Official NBA: discovers the current season's Nightly Recap playlist from the verified @NBA channel and caches its IDs. It scans the playlist (bounded to eight pages), checks the latest two pages of official uploads for videos not yet added, and uses a bounded historical uploads scan if the playlist is unavailable. Metadata is rechecked daily. Only dated Nightly Recap titles are kept, one record per game date for the last 23 days (plus the current date). No videos are downloaded; only metadata and YouTube IDs are stored.
+- The recap date comes from the title, not the upload timestamp. Official NBA and Motion Station data are stored separately in the same `videos.json` file. An unavailable source does not erase the other source's cached videos. A successful workflow can still report stale-source warnings; check its logs if links are missing.
 
 ## Troubleshooting
 
-- **Old version after a commit:** Wait for deployment to succeed. Then open https://eagutter.github.io/nba-recap/ and press **Ctrl+Shift+R**. If TablissNG still caches it, append `?v=5` to the iframe `src` URL.
-- **Missing scores:** ESPN's unofficial public scoreboard endpoint may be unavailable. The widget checks only fully finished days.
-- **Missing recap:** Motion Station may not have posted it, or the video may not have been collected/matched yet. Look for recent entries in `videos.json` and verify GitHub Actions logs.
-- **Can't see all cards:** Use the slim horizontal scrollbar. Cards do not wrap onto a second row.
-- **No arrows:** Refresh to the latest HTML and ensure the whole 180px-high iframe is visible in TablissNG.
+- **Nightly Recap absent:** check whether the official NBA channel has posted the selected date's recap; then inspect `nightly_recaps` in `videos.json` and the latest Action log. Trigger a manual run if necessary. The first live run verifies playlist discovery with your API key.
+- **Individual game missing:** check the Motion Station entry in `videos.json`; the original team/date/score matcher is unchanged.
+- **Old page:** use Ctrl+Shift+R on the live site; add or increment a query parameter in the iframe URL.
+- **Workflow failed:** open its logs. Verify the `YOUTUBE_API_KEY` secret and that Pages uses GitHub Actions. Do not expose your API key when sharing a log.
