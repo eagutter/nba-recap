@@ -1,6 +1,6 @@
 # NBA Recap
 
-Compact NBA results for a Firefox/TablissNG new tab. Shows the latest fully completed NBA game day and lets you browse the last seven completed game days (skipping dates without games). Individual cards link to Motion Station's short recaps when matched. The **Nightly Recap** button opens the official NBA YouTube channel's combined recap for the date displayed, when available. The date footer stays minimal; the scores stay in a single row, with horizontal scrolling on narrow screens.
+Compact NBA results for a Firefox/TablissNG new tab. Shows the latest fully completed NBA game day and lets you browse the last seven completed game days (skipping dates without games). Individual cards link to Motion Station's short recaps when matched. The **Nightly Recap** button opens the official NBA YouTube channel's combined recap for the date displayed, when available. The Nightly Recap button is centred beneath the date picker. The date footer stays minimal; the scores stay in a single row, with horizontal scrolling on narrow screens.
 
 **Live widget:** https://eagutter.github.io/nba-recap/
 
@@ -16,7 +16,7 @@ Compact NBA results for a Firefox/TablissNG new tab. Shows the latest fully comp
     src="https://eagutter.github.io/nba-recap/"
     title="NBA Recap"
     scrolling="no"
-    style="display:block;width:100%;height:180px;margin:0;padding:0;border:0;background:transparent;overflow:hidden;"
+    style="display:block;width:100%;height:220px;margin:0;padding:0;border:0;background:transparent;overflow:hidden;"
   ></iframe>
 </div>
 ```
@@ -29,7 +29,11 @@ No new GitHub repository, API key, Python installation or hosting setup is neede
 2. Select **Add file → Upload files**. Upload the three files `index.html`, `update_highlights.py` and `README.md` together, replacing their current versions. Do **not** upload a blank or replacement `videos.json`; the updater migrates the existing cache automatically.
 3. Click **Commit changes**, committing directly to `main`. The existing workflow should start automatically. The included `.github/workflows/update-highlights.yml` is a reference copy of the existing hourly workflow; it does not need replacing.
 4. Open https://github.com/eagutter/nba-recap/actions and check the latest run of **Update NBA highlights and publish page**. The existing step named “Read Motion Station uploads” now collects both sources. Its log should include `Official NBA Nightly Recap: ... recent game dates found` and `Saved ... official nightly recaps`. A first run may take longer because it also discovers the seasonal playlist and backfills history. If no run starts, open the workflow and click **Run workflow**.
-5. After a successful deployment, open https://eagutter.github.io/nba-recap/?v=nightly and test the Nightly Recap button for several dates. The link should open the exact date's official NBA video in a new tab. Refresh TablissNG; if stale, append `?v=nightly` to its iframe URL. No other iframe changes are required.
+5. After a successful deployment, open https://eagutter.github.io/nba-recap/?v=nightly and test the Nightly Recap button for several dates. The link should open the exact date's official NBA video in a new tab. Refresh TablissNG; if stale, append `?v=nightly` to its iframe URL. Set the iframe height to `220px` (instead of `180px`) to leave room for the centred Nightly Recap button without clipping.
+
+## Update the centred Nightly Recap layout
+
+If the Nightly Recap update is already installed, replace only `index.html` and `README.md`, commit to `main`, then change the TablissNG iframe height from `180px` to `220px`. No Python, API key, or workflow changes are needed.
 
 ## Using the widget
 
