@@ -1,7 +1,17 @@
 {
   "channel": "Motion Station",
-  "updated_at": "2026-11-24T05:55:09+00:00",
+  "updated_at": "2026-11-24T11:21:51+00:00",
   "videos": [
+    {
+      "id": "q6yWAC6iMPQ",
+      "title": "Game Recap: Spurs 123, Kings 107 (Nov. 23)",
+      "published": "2026-11-24T06:48:11Z"
+    },
+    {
+      "id": "TLXBprAwLTo",
+      "title": "Game Recap: Lakers 109, Jazz 94 (Nov. 23)",
+      "published": "2026-11-24T06:36:02Z"
+    },
     {
       "id": "arvwjLRUcac",
       "title": "Game Recap: Suns 123, Pelicans 119 (Nov. 23)",
@@ -851,5 +861,125 @@
   "channel_cache": {
     "uploads_playlist_id": "UULd4dSmXdrJykO_hgOzbfPw",
     "checked_at": "2026-11-23T21:13:31+00:00"
-  }
+  },
+  "nightly_recaps": {
+    "2026-11-23": {
+      "id": "WVxW1iScWKg",
+      "title": "NBA's Nightly Recap | November 23, 2026",
+      "published": "2026-11-24T07:05:21Z"
+    },
+    "2026-11-22": {
+      "id": "vm3YVrO_ug4",
+      "title": "NBA's Nightly Recap | November 22, 2026",
+      "published": "2026-11-23T05:37:42Z"
+    },
+    "2026-11-21": {
+      "id": "QIZUemPDDmU",
+      "title": "NBA's Nightly Recap | November 21, 2026",
+      "published": "2026-11-22T07:23:42Z"
+    },
+    "2026-11-20": {
+      "id": "Al-EioHioAw",
+      "title": "NBA's Nightly Recap | November 20, 2026",
+      "published": "2026-11-21T09:07:17Z"
+    },
+    "2026-11-19": {
+      "id": "-UedEoekVC8",
+      "title": "NBA's Nightly Recap | November 19, 2026",
+      "published": "2026-11-20T08:05:01Z"
+    },
+    "2026-11-18": {
+      "id": "-BaefWqnu98",
+      "title": "NBA's Nightly Recap | November 18, 2026",
+      "published": "2026-11-19T07:00:03Z"
+    },
+    "2026-11-17": {
+      "id": "UlFNmd1e_Q4",
+      "title": "NBA's Nightly Recap | November 17, 2026",
+      "published": "2026-11-18T08:20:52Z"
+    },
+    "2026-11-16": {
+      "id": "Iuykco0mBYQ",
+      "title": "NBA's Nightly Recap | November 16, 2026",
+      "published": "2026-11-17T06:54:14Z"
+    },
+    "2026-11-15": {
+      "id": "ZaTnOxYqJNk",
+      "title": "NBA's Nightly Recap | November 15, 2026",
+      "published": "2026-11-16T05:37:30Z"
+    },
+    "2026-11-14": {
+      "id": "wBWGQAdIMmw",
+      "title": "NBA's Nightly Recap | November 14, 2026",
+      "published": "2026-11-15T07:28:33Z"
+    },
+    "2026-11-13": {
+      "id": "VH9MaXXfG1A",
+      "title": "NBA's Nightly Recap | November 13, 2026",
+      "published": "2026-11-14T07:09:56Z"
+    },
+    "2026-11-12": {
+      "id": "FWyvg-ZC1XU",
+      "title": "NBA's Nightly Recap | November 12, 2026",
+      "published": "2026-11-13T06:16:09Z"
+    },
+    "2026-11-11": {
+      "id": "iQSno49cyIE",
+      "title": "NBA's Nightly Recap | November 11, 2026",
+      "published": "2026-11-12T07:29:21Z"
+    },
+    "2026-11-10": {
+      "id": "gCN7Eho3qc4",
+      "title": "NBA's Nightly Recap | November 10, 2026",
+      "published": "2026-11-11T09:01:54Z"
+    },
+    "2026-11-09": {
+      "id": "ETVUBCD7-Bk",
+      "title": "NBA's Nightly Recap | November 9, 2026",
+      "published": "2026-11-10T07:38:59Z"
+    },
+    "2026-11-08": {
+      "id": "lZ6E7rE7mpw",
+      "title": "NBA's Nightly Recap | November 8, 2026",
+      "published": "2026-11-09T06:40:34Z"
+    },
+    "2026-11-07": {
+      "id": "NAotzr5y2SI",
+      "title": "NBA's Nightly Recap | November 7, 2026",
+      "published": "2026-11-08T07:23:02Z"
+    },
+    "2026-11-06": {
+      "id": "xb5bhJQE6vw",
+      "title": "NBA's Nightly Recap | November 6, 2026",
+      "published": "2026-11-07T08:16:14Z"
+    },
+    "2026-11-05": {
+      "id": "SZMSvEkxtMs",
+      "title": "NBA's Nightly Recap | November 5, 2026",
+      "published": "2026-11-06T08:33:52Z"
+    },
+    "2026-11-04": {
+      "id": "1aNrzlqRhaY",
+      "title": "NBA's Nightly Recap | November 4, 2026",
+      "published": "2026-11-05T08:36:53Z"
+    },
+    "2026-11-02": {
+      "id": "yvckXUGV8Mo",
+      "title": "NBA's Nightly Recap | November 2, 2026",
+      "published": "2026-11-03T07:17:30Z"
+    },
+    "2026-11-01": {
+      "id": "X3cR-TMPnhc",
+      "title": "NBA's Nightly Recap | November 1, 2026",
+      "published": "2026-11-02T07:03:46Z"
+    }
+  },
+  "nba_channel_cache": {
+    "uploads_playlist_id": "UUWJ2lWNubArHWmf3FIHbfcQ",
+    "recap_playlist_id": "PLaMWIRum7wA0",
+    "season": "2026-27",
+    "checked_at": "2026-11-24T11:21:51+00:00",
+    "backfill_at": null
+  },
+  "nightly_updated_at": "2026-11-24T11:21:51+00:00"
 }
