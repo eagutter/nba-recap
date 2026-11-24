@@ -16,7 +16,7 @@ Compact NBA results for a Firefox/TablissNG new tab. Shows the latest fully comp
     src="https://eagutter.github.io/nba-recap/"
     title="NBA Recap"
     scrolling="no"
-    style="display:block;width:100%;height:220px;margin:0;padding:0;border:0;background:transparent;overflow:hidden;"
+    style="display:block;width:100%;height:200px;margin:0;padding:0;border:0;background:transparent;overflow:hidden;"
   ></iframe>
 </div>
 ```
