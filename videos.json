@@ -1,7 +1,22 @@
 {
   "channel": "Motion Station",
-  "updated_at": "2026-11-25T02:16:41+00:00",
+  "updated_at": "2026-11-25T09:34:39+00:00",
   "videos": [
+    {
+      "id": "XN-D_Z4FvJc",
+      "title": "Game Recap: Mavericks 120, Nuggets 101 (Nov. 24)",
+      "published": "2026-11-25T08:00:37Z"
+    },
+    {
+      "id": "CbkDeTVee2c",
+      "title": "Game Recap: Celtics 131, Wizards 116 (Nov. 24)",
+      "published": "2026-11-25T04:51:09Z"
+    },
+    {
+      "id": "-7f2wvZA8s4",
+      "title": "Game Recap: Pistons 104, Magic 86 (Nov. 24)",
+      "published": "2026-11-25T03:34:56Z"
+    },
     {
       "id": "q6yWAC6iMPQ",
       "title": "Game Recap: Spurs 123, Kings 107 (Nov. 23)",
@@ -836,21 +851,6 @@
       "id": "P_MtH0pJBr4",
       "title": "Game Recap: Thunder 117, Cavaliers 112",
       "published": "2026-11-03T04:05:23Z"
-    },
-    {
-      "id": "aFpJ0mzIU08",
-      "title": "Game Recap: Lakers 131, Raptors 125",
-      "published": "2026-11-02T06:22:12Z"
-    },
-    {
-      "id": "rESxdkefiPk",
-      "title": "Game Recap:  Warriors 124, Clippers 112",
-      "published": "2026-11-02T06:21:47Z"
-    },
-    {
-      "id": "EkTaxIfVjio",
-      "title": "Game Recap: Nets 98, Pacers 90",
-      "published": "2026-11-02T04:47:31Z"
     }
   ],
   "channel_cache": {
@@ -858,6 +858,11 @@
     "checked_at": "2026-11-25T02:16:41+00:00"
   },
   "nightly_recaps": {
+    "2026-11-24": {
+      "id": "fSyi8WmaoY0",
+      "title": "NBA's Nightly Recap | November 24, 2026",
+      "published": "2026-11-25T07:09:24Z"
+    },
     "2026-11-23": {
       "id": "WVxW1iScWKg",
       "title": "NBA's Nightly Recap | November 23, 2026",
@@ -962,11 +967,6 @@
       "id": "yvckXUGV8Mo",
       "title": "NBA's Nightly Recap | November 2, 2026",
       "published": "2026-11-03T07:17:30Z"
-    },
-    "2026-11-01": {
-      "id": "X3cR-TMPnhc",
-      "title": "NBA's Nightly Recap | November 1, 2026",
-      "published": "2026-11-02T07:03:46Z"
     }
   },
   "nba_channel_cache": {
@@ -976,5 +976,5 @@
     "checked_at": "2026-11-24T11:21:51+00:00",
     "backfill_at": null
   },
-  "nightly_updated_at": "2026-11-24T11:21:51+00:00"
+  "nightly_updated_at": "2026-11-25T09:34:39+00:00"
 }
