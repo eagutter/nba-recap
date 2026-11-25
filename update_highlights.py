@@ -13,6 +13,7 @@ import json
 import os
 from pathlib import Path
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -44,7 +45,22 @@ def parse_time(value):
 
 def api_call(api_key, endpoint, **params):
     params["key"] = api_key
-    return fetch_json(API_BASE + endpoint + "?" + urllib.parse.urlencode(params))
+    url = API_BASE + endpoint + "?" + urllib.parse.urlencode(params)
+    # Retry transient errors without exposing the API key in logs.
+    # Search has its own quota; use just one request per run for recovery.
+    attempts = 1 if endpoint == "search" else 3
+    for attempt in range(attempts):
+        try:
+            return fetch_json(url)
+        except urllib.error.HTTPError as exc:
+            if exc.code not in (408, 429, 500, 502, 503, 504) or attempt + 1 == attempts:
+                raise
+            print(f"YouTube {endpoint}: HTTP {exc.code}; retrying", flush=True)
+        except (OSError, ValueError):
+            if attempt + 1 == attempts:
+                raise
+            print(f"YouTube {endpoint}: transient request failure; retrying", flush=True)
+        time.sleep(2 ** (attempt + 1))
 
 
 def fetch_channel_playlist(api_key):
@@ -391,6 +407,101 @@ def collect_nightly(api_key, old_cache, old_recaps, now):
     return records, cache
 
 
+
+ESPN_URL = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard"
+
+
+def completed_game_days(now):
+    """Mirror the widget: seven fully completed Eastern game dates, up to 21 days back."""
+    today = nba_game_today(now)
+    start, end = today - timedelta(days=21), today - timedelta(days=1)
+    url = ESPN_URL + "?" + urllib.parse.urlencode({
+        "dates": f"{start:%Y%m%d}-{end:%Y%m%d}", "limit": 1000})
+    result = fetch_json(url)
+    if not isinstance(result.get("events"), list):
+        raise ValueError("Unexpected ESPN scoreboard response")
+    grouped = {}
+    for event in result["events"]:
+        tipoff = parse_time(event.get("date"))
+        if tipoff is None:
+            raise ValueError("Missing ESPN event date")
+        day = tipoff.astimezone(ZoneInfo("America/New_York")).date()
+        if not start <= day <= end:
+            continue
+        status = event.get("status", {}).get("type", {})
+        competitions = event.get("competitions") or [{}]
+        completed = status.get("completed") is True or competitions[0].get("status", {}).get("type", {}).get("completed") is True
+        grouped.setdefault(day.isoformat(), []).append(completed)
+    return sorted((day for day, games in grouped.items() if games and all(games)), reverse=True)[:7]
+
+
+def search_missing_recaps(api_key, missing, now):
+    """One channel-restricted search, only when a displayed date lacks a recap."""
+    if not api_key or not missing:
+        return {}
+    oldest = date.fromisoformat(min(missing)) - timedelta(days=1)
+    result = api_call(api_key, "search", part="snippet", channelId=NBA_CHANNEL_ID,
+                      type="video", q="Nightly Recap", order="date", maxResults=50,
+                      publishedAfter=oldest.isoformat() + "T00:00:00Z")
+    items = result.get("items")
+    if not isinstance(items, list):
+        raise ValueError("Unexpected YouTube search response")
+    found = {}
+    for item in items:
+        snippet = item.get("snippet", {})
+        if snippet.get("channelId") != NBA_CHANNEL_ID or snippet.get("liveBroadcastContent") in ("live", "upcoming"):
+            continue
+        record = recap_record({"snippet": {**snippet, "videoOwnerChannelId": NBA_CHANNEL_ID},
+                               "contentDetails": {"videoId": item.get("id", {}).get("videoId"),
+                                                  "videoPublishedAt": snippet.get("publishedAt")}}, now, curated=True)
+        if record and record[0] in missing:
+            found = merge_recaps(found, dict([record]), now)
+    return found
+
+
+def recover_and_report(api_key, old, fresh, motion_ok, now):
+    nightly = merge_recaps(old, fresh or {}, now)
+    schedule_ok = True
+    try:
+        expected = completed_game_days(now)
+    except (OSError, ValueError, TypeError, KeyError) as exc:
+        schedule_ok = False
+        print(f"::warning title=ESPN completeness check unavailable::{type(exc).__name__}", flush=True)
+        # Still attempt recovery for recent dates; do not claim these are game days.
+        expected = [(nba_game_today(now) - timedelta(days=i)).isoformat() for i in (1, 2)]
+    missing = [day for day in expected if day not in nightly]
+    search_status = "Not needed"
+    if missing:
+        if not api_key:
+            search_status = "Unavailable (missing API key)"
+        else:
+            try:
+                recovered = search_missing_recaps(api_key, missing, now)
+                nightly = merge_recaps(nightly, recovered, now)
+                search_status = f"Completed; recovered {len(recovered)} recap(s)"
+            except (OSError, ValueError, KeyError, TypeError) as exc:
+                search_status = f"Failed ({type(exc).__name__})"
+                print(f"::warning title=NBA recap recovery search::{search_status}", flush=True)
+    missing = [day for day in expected if day not in nightly]
+    summary = ["## NBA video collection", f"Checked (UTC): {now.isoformat(timespec='seconds')}",
+               f"Motion Station: {'retrieved' if motion_ok else 'FAILED — using cached records'}",
+               f"Official NBA playlist/uploads: {'retrieved' if fresh is not None else 'FAILED — using cached records'}",
+               f"YouTube recovery search: {search_status}",
+               f"Completed game dates: {', '.join(expected) or 'none'}" if schedule_ok else "Completed game dates: unverified (ESPN unavailable)",
+               f"Missing nightly recaps: {', '.join(missing) or 'none'}" if schedule_ok else f"Unmatched recent dates (not verified game days): {', '.join(missing) or 'none'}"]
+    if missing and schedule_ok:
+        print("::warning title=Nightly recaps incomplete::" + ", ".join(missing) + "; will recheck next run. Not found does not prove unpublished.", flush=True)
+    elif schedule_ok:
+        print("All displayed completed game days have a nightly recap", flush=True)
+    for line in summary:
+        print(line, flush=True)
+    summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+    if summary_path:
+        with open(summary_path, "a", encoding="utf-8") as out:
+            out.write("\n\n".join(summary) + "\n")
+    return nightly
+
+
 def main():
     now = datetime.now(timezone.utc)
     # Keep the existing Motion Station JSON shape; nightly recaps are separate.
@@ -419,7 +530,7 @@ def main():
         videos = merge_videos(old, fresh, now)
     if recaps is None:
         print("::warning title=Nightly recaps stale::Keeping cached official recaps", flush=True)
-    nightly = merge_recaps(old_recaps, recaps or {}, now)
+    nightly = recover_and_report(api_key, old_recaps, recaps, fresh is not None, now)
     if fresh is None and recaps is None and not old and not nightly:
         raise RuntimeError("Neither source available and no cached highlights exist")
     updated = dict(data)
