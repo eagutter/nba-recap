@@ -9,47 +9,75 @@ on:
     - cron: '22,37,52 8-11 * * *'
       timezone: Europe/London
   workflow_dispatch:
+    inputs:
+      publish_widget:
+        description: Also redeploy the widget HTML (only needed for website changes)
+        type: boolean
+        default: false
 
-permissions:
-  contents: write
-  pages: write
-  id-token: write
-
-concurrency:
-  group: nba-recap-pages
-  cancel-in-progress: false
-
+# Serialise writes separately from deployments. A scheduled collection cannot
+# cancel or block a pending website deployment at the workflow level.
 jobs:
-  update-and-deploy:
+  collect:
+    name: Collect video links
     runs-on: ubuntu-latest
     timeout-minutes: 12
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      contents: write
+    concurrency:
+      group: nba-recap-collection
+      cancel-in-progress: false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: main
           fetch-depth: 0
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - name: Collect Motion Station and official NBA recaps
         env:
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
         run: python update_highlights.py
-      - name: Keep a history of published highlight URLs
+      - name: Save updated video data
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add videos.json
           if ! git diff --cached --quiet; then
             git commit -m 'Update NBA highlight links'
+            git pull --rebase origin main
             git push origin HEAD:main
           fi
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+
+  deploy:
+    name: Publish widget HTML
+    # Routine scheduled and manual data checks do not use the Pages artifact API.
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.publish_widget)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      actions: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: nba-recap-site-deployment
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v6
         with:
-          path: '.'
-      - uses: actions/deploy-pages@v4
+          ref: main
+      - uses: actions/configure-pages@v6
+      - name: Prepare static widget and fallback data
+        run: |
+          mkdir -p _site
+          cp index.html videos.json _site/
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+      - uses: actions/deploy-pages@v5
         id: deployment
