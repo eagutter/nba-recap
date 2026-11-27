@@ -238,22 +238,52 @@
       }
       return days;
     }
+    // Video data is independent of Pages deployments. A committed JSON update
+    // is sufficient; the old Pages snapshot is only a fallback.
+    const VIDEO_DATA_URL = "https://raw.githubusercontent.com/eagutter/nba-recap/main/videos.json";
+    const VIDEO_CACHE_KEY = "nba-recap-video-data-v2";
     async function fetchVideoData() {
-      const empty = { videos: [], nightlyRecaps: {} };
+      function validate(data) {
+        if (!data || !Array.isArray(data.videos) || !data.nightly_recaps ||
+            typeof data.nightly_recaps !== "object" || Array.isArray(data.nightly_recaps)) {
+          throw new Error("Unexpected video data format");
+        }
+        const videos = data.videos.filter(v => v && typeof v.title === "string" &&
+          /^[a-zA-Z0-9_-]{11}$/.test(v.id) && typeof v.published === "string");
+        return { videos, nightlyRecaps: data.nightly_recaps };
+      }
+      const cacheBuster = Math.floor(Date.now() / (5 * 60 * 1000));
+      // Retain the last good repository response during network interruptions.
+      // Never replace it with the potentially older deployed snapshot.
+      let saved = null;
       try {
-        const cacheBuster = Math.floor(Date.now() / (15*60*1000));
-        const response = await fetch(`./videos.json?v=${cacheBuster}`, { cache: "no-store" });
-        if (!response.ok) return empty;
+        const entry = JSON.parse(localStorage.getItem(VIDEO_CACHE_KEY));
+        if (entry && Date.now() - entry.savedAt < 24 * 60 * 60 * 1000) saved = validate(entry.data);
+      } catch (_) { /* Optional storage. */ }
+      try {
+        const response = await fetch(`${VIDEO_DATA_URL}?v=${cacheBuster}`, {
+          cache: "no-store", credentials: "omit", signal: AbortSignal.timeout(8000)
+        });
+        if (!response.ok) throw new Error(`Repository returned HTTP ${response.status}`);
         const data = await response.json();
-        const videos = Array.isArray(data.videos) ? data.videos.filter(v =>
-          v && typeof v.title === "string" && /^[a-zA-Z0-9_-]{11}$/.test(v.id) &&
-          typeof v.published === "string") : [];
-        const nightlyRecaps = data.nightly_recaps && typeof data.nightly_recaps === "object"
-          ? data.nightly_recaps : {};
-        return { videos, nightlyRecaps };
+        const result = validate(data);
+        try { localStorage.setItem(VIDEO_CACHE_KEY, JSON.stringify({savedAt: Date.now(), data})); }
+        catch (_) { /* Optional storage. */ }
+        return result;
       } catch (error) {
-        console.warn("Video data not available yet:", error);
-        return empty;
+        console.warn("Live video data unavailable; using fallback:", error);
+      }
+      if (recentVideos.length || Object.keys(nightlyRecaps).length) return { videos: recentVideos, nightlyRecaps };
+      if (saved) return saved;
+      try {
+        const response = await fetch(`./videos.json?v=${cacheBuster}`, {
+          cache: "no-store", signal: AbortSignal.timeout(8000)
+        });
+        if (!response.ok) throw new Error(`Pages snapshot returned HTTP ${response.status}`);
+        return validate(await response.json());
+      } catch (error) {
+        console.warn("Video snapshot unavailable:", error);
+        return { videos: [], nightlyRecaps: {} };
       }
     }
 
