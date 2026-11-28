@@ -1,7 +1,62 @@
 {
   "channel": "Motion Station",
-  "updated_at": "2026-11-26T12:17:04+00:00",
+  "updated_at": "2026-11-28T07:37:32+00:00",
   "videos": [
+    {
+      "id": "ddzK7_HAN8A",
+      "title": "Game Recap: Trail Blazers 116, Warriors 94 (Nov. 27)",
+      "published": "2026-11-28T07:26:31Z"
+    },
+    {
+      "id": "iSls8CVp3Zo",
+      "title": "Game Recap: Pelicans 105, Clippers 104 (Nov. 27)",
+      "published": "2026-11-28T07:25:42Z"
+    },
+    {
+      "id": "HptwbkdjGeE",
+      "title": "Game Recap: Nuggets 120, Jazz 107 (Nov. 27)",
+      "published": "2026-11-28T07:25:00Z"
+    },
+    {
+      "id": "V5k9eDdqjLg",
+      "title": "Game Recap: Spurs 99, Lakers 96 (Nov. 27)",
+      "published": "2026-11-28T07:23:51Z"
+    },
+    {
+      "id": "9JSwEsqtshQ",
+      "title": "Game Recap: Mavericks 113, Suns 109 (Nov. 27)",
+      "published": "2026-11-28T07:22:58Z"
+    },
+    {
+      "id": "4rwEA-Wks7g",
+      "title": "Game Recap: Grizzlies 114, Timberwolves 109 (Nov. 27)",
+      "published": "2026-11-28T07:22:11Z"
+    },
+    {
+      "id": "RESylAYKKpI",
+      "title": "Game Recap: Hawks 87, Celtics 86 (Nov. 27)",
+      "published": "2026-11-28T05:38:35Z"
+    },
+    {
+      "id": "UW0_AVyhlMc",
+      "title": "Game Recap: Raptors 124, Nets 100 (Nov. 27)",
+      "published": "2026-11-28T04:41:15Z"
+    },
+    {
+      "id": "1kmNirP8Kuc",
+      "title": "Game Recap: 76ers 111, Pacers 87 (Nov. 27)",
+      "published": "2026-11-28T04:39:00Z"
+    },
+    {
+      "id": "JT7CkuULyQw",
+      "title": "Game Recap: Pistons 113, Bucks 98 (Nov. 27)",
+      "published": "2026-11-28T04:38:17Z"
+    },
+    {
+      "id": "yWpfWrf6dV0",
+      "title": "Game Recap: Heat 108, Knicks 105 (Nov. 27)",
+      "published": "2026-11-28T04:37:26Z"
+    },
     {
       "id": "jU_K-5SSgiI",
       "title": "Game Recap: Trail Blazers 116, Spurs 111 (Nov. 25)",
@@ -781,53 +836,18 @@
       "id": "1LjPx6q_zwg",
       "title": "Game Recap: Nuggets 128, Raptors 109",
       "published": "2026-11-05T08:10:54Z"
-    },
-    {
-      "id": "KVEW_1baIVk",
-      "title": "Game Recap: Timberwolves 117, Rockets 107",
-      "published": "2026-11-05T05:52:58Z"
-    },
-    {
-      "id": "dMW-6GhliRw",
-      "title": "Game Recap: Pacers 107, Grizzlies 103",
-      "published": "2026-11-05T05:29:17Z"
-    },
-    {
-      "id": "q0kdlzKYquc",
-      "title": "Game Recap: Thunder 124, Cavaliers 116",
-      "published": "2026-11-05T05:00:17Z"
-    },
-    {
-      "id": "ylnekGsxAas",
-      "title": "Game Recap: Nets 114, Hornets 104",
-      "published": "2026-11-05T04:59:53Z"
-    },
-    {
-      "id": "M6ha4CDA6Zs",
-      "title": "Game Recap: Hawks 120, Wizards 105",
-      "published": "2026-11-05T04:46:09Z"
-    },
-    {
-      "id": "IwbuPI2TsJo",
-      "title": "Game Recap: Knicks 135, Bulls 105",
-      "published": "2026-11-05T04:29:13Z"
-    },
-    {
-      "id": "g7Z8g8wCUi0",
-      "title": "Game Recap:  76ers 112, Pistons 106",
-      "published": "2026-11-05T04:24:27Z"
-    },
-    {
-      "id": "wW7N-zPb1DY",
-      "title": "Game Recap: Celtics 109, Bucks 102",
-      "published": "2026-11-05T04:11:53Z"
     }
   ],
   "channel_cache": {
     "uploads_playlist_id": "UULd4dSmXdrJykO_hgOzbfPw",
-    "checked_at": "2026-11-27T04:57:05+00:00"
+    "checked_at": "2026-11-28T07:37:32+00:00"
   },
   "nightly_recaps": {
+    "2026-11-27": {
+      "id": "WR7bu4PP1hs",
+      "title": "NBA's Nightly Recap | November 27, 2026",
+      "published": "2026-11-28T06:58:12Z"
+    },
     "2026-11-25": {
       "id": "SEhz3l_hehc",
       "title": "NBA's Nightly Recap | November 25, 2026",
@@ -932,11 +952,6 @@
       "id": "SZMSvEkxtMs",
       "title": "NBA's Nightly Recap | November 5, 2026",
       "published": "2026-11-06T08:33:52Z"
-    },
-    "2026-11-04": {
-      "id": "1aNrzlqRhaY",
-      "title": "NBA's Nightly Recap | November 4, 2026",
-      "published": "2026-11-05T08:36:53Z"
     }
   },
   "nba_channel_cache": {
@@ -946,5 +961,5 @@
     "checked_at": "2026-11-27T23:24:18+00:00",
     "backfill_at": null
   },
-  "nightly_updated_at": "2026-11-26T12:17:04+00:00"
+  "nightly_updated_at": "2026-11-28T07:37:32+00:00"
 }
